@@ -25,6 +25,9 @@ final class HostPeer: Identifiable {
     private var ended = false
     private var clipboard: ClipboardBridge?
     private var files: FileReceiver?
+    private var outgoing: FileSender?
+    /// The latest message about files this Mac sends to this viewer.
+    private(set) var sendStatus: String?
     private var openAppLimiter = OpenAppLimiter()
     var onEnded: ((HostPeer) -> Void)?
     var onChange: (() -> Void)?
@@ -80,12 +83,16 @@ final class HostPeer: Identifiable {
                 sendWindowList()
                 startClipboard()
                 files = FileReceiver(
+                    settingKey: FileReceiver.enabledKey,
                     hasOpenStream: { [weak self] in self.map { !$0.streams.isEmpty } ?? false },
                     reply: { [weak self] in self?.send(.fileReply, $0) },
                     finished: { [weak self] url, _ in
                         guard let self else { return }
                         self.host?.fileReceived(url, from: self.viewerName)
                     })
+                outgoing = FileSender(
+                    send: { [weak self] in self?.channel.send($0) },
+                    status: { [weak self] in self?.sendStatus = $0; self?.onChange?() })
                 onChange?()
             case .failure(let problem):
                 channel.sendError(code: "hello", message: "\(problem)")
@@ -141,12 +148,14 @@ final class HostPeer: Identifiable {
                 files?.chunk(frame.payload)
             case .fileEnd:
                 files?.end(try MessageCodec.decode(FileEnd.self, from: frame))
+            case .fileReply:
+                outgoing?.reply(try MessageCodec.decode(FileReply.self, from: frame))
             case .ping:
                 channel.send(Frame(kind: .pong, payload: frame.payload.prefix(8)))
             case .pong, .error:
                 break
             case .hello, .windowList, .streamStarted, .parameterSets, .videoFrame, .resized, .inputState, .streamInfo,
-                 .audioStarted, .audioFrame, .audioStopped, .fileReply, .appList, .openAppResult,
+                 .audioStarted, .audioFrame, .audioStopped, .appList, .openAppResult,
                  .pairBegin, .pairChallenge, .pairResponse, .pairResult, .pairStatus:
                 channel.sendError(code: "unexpected", message: "Unexpected message \(kind).")
                 channel.close()
@@ -221,6 +230,14 @@ final class HostPeer: Identifiable {
         sendWindowList()
     }
 
+    /// The host user chose files for this viewer. They go one at a time; the viewer must accept them.
+    func sendFiles(_ urls: [URL]) {
+        guard saidHello, !ended, let outgoing else { return }
+        outgoing.enqueue(urls)
+    }
+
+    var canSendFiles: Bool { saidHello && !ended && outgoing != nil }
+
     private func startClipboard() {
         let bridge = ClipboardBridge(
             isViewer: false,
@@ -236,6 +253,8 @@ final class HostPeer: Identifiable {
         clipboard = nil
         files?.discard()
         files = nil
+        outgoing?.stop()
+        outgoing = nil
         audioWanted.removeAll()
         for a in audio.values { a.stop(.turnedOffOnHost) }
         audio.removeAll()
@@ -283,6 +302,8 @@ final class HostPeer: Identifiable {
     private func closed() {
         files?.discard()
         files = nil
+        outgoing?.stop()
+        outgoing = nil
         clipboard?.stop()
         clipboard = nil
         guard !ended else { return }

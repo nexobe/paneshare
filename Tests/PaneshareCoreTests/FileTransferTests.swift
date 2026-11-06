@@ -73,4 +73,18 @@ final class FileTransferTests: XCTestCase {
         XCTAssertTrue(p.isFullySent)
         XCTAssertNil(p.next())
     }
+
+    func testUnansweredOfferTimesOut() {
+        XCTAssertFalse(FileTransferRules.offerTimedOut(offeredAt: 100, now: 100))
+        XCTAssertFalse(FileTransferRules.offerTimedOut(offeredAt: 100, now: 100 + FileTransferRules.offerTimeout - 0.1))
+        XCTAssertTrue(FileTransferRules.offerTimedOut(offeredAt: 100, now: 100 + FileTransferRules.offerTimeout))
+    }
+
+    /// Both directions use the same messages, so a reply with only the old fields still decodes.
+    func testReplyFromEitherDirectionDecodesWithAndWithoutOptionalFields() throws {
+        let bare = try JSONDecoder().decode(FileReply.self, from: Data(#"{"id":7,"accepted":false}"#.utf8))
+        XCTAssertEqual(bare, FileReply(id: 7, accepted: false))
+        let full = FileReply(id: 7, accepted: true, reason: nil, received: 10, done: true)
+        XCTAssertEqual(try JSONDecoder().decode(FileReply.self, from: JSONEncoder().encode(full)), full)
+    }
 }

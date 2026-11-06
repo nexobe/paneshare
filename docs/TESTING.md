@@ -212,6 +212,9 @@ Turn the overlay off with `defaults delete dev.paneshare.app debugOverlay`.
 | I18 | With accepting off on the host, drop a file. Then, with it on, drop a folder, and drop a file with the same name twice. | The first is refused with a message. The folder is refused. The second copy is named `name 2.ext`, and nothing is replaced. |
 | I19 | Quit the viewer in the middle of a large transfer. | No `.part` file stays in `Downloads/paneshare` on the host. Typing still works during a transfer. |
 | I20 | Send an app or script, then open it on the host. | Gatekeeper treats it as downloaded, and `xattr -l` shows `com.apple.quarantine`. |
+| I21 | Viewer: **This Mac** → turn on **Accept files from Macs I connect to**, and open one of the host's windows. Host: under **Viewers**, click **Send Files…** on the viewer's row and pick two files. Then drag a file onto the same row. | Each file appears in `Downloads/paneshare` on the viewer with matching contents (`shasum`), one after the other. Progress shows under the viewer's row on the host. The viewer's **Connect** tab says the host sent the file and offers **Show in Finder**. The file has `com.apple.quarantine`. |
+| I22 | With the viewer setting off, send a file. Then turn it on, close every remote window on the viewer, and send again. | Both are refused with a message under the viewer's row on the host. Nothing is written on the viewer. Accepting dropped files on the viewer (I17's setting) doesn't let a host send. |
+| I23 | Disconnect the viewer, or quit the host, in the middle of a large transfer. | No `.part` file stays in `Downloads/paneshare` on the viewer. Typing in the remote window still works during a transfer. |
 
 ### 4.4 Resize
 

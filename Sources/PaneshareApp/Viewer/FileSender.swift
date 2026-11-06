@@ -3,7 +3,8 @@ import Crypto
 import Foundation
 import PaneshareCore
 
-/// Sends dropped files to the host one at a time, as fast as the host acknowledges them.
+/// Sends files to the other Mac one at a time, as fast as it acknowledges them. The viewer uses it
+/// for files dropped on a remote window, and the host for files its user sends to a viewer.
 @MainActor
 final class FileSender {
     private struct Active {
@@ -70,6 +71,19 @@ final class FileSender {
         if let frame = try? MessageCodec.frame(.fileOffer, FileOffer(id: id, name: url.lastPathComponent, size: UInt64(size))) {
             send(frame)
         }
+        status("Offering \(url.lastPathComponent)…")
+        let offeredAt = ProcessInfo.processInfo.systemUptime
+        DispatchQueue.main.asyncAfter(deadline: .now() + FileTransferRules.offerTimeout) { [weak self] in
+            MainActor.assumeIsolated { self?.checkAnswered(id, offeredAt: offeredAt) }
+        }
+    }
+
+    /// An older Mac drops offers it can't take without answering; stop waiting for it.
+    private func checkAnswered(_ id: UInt32, offeredAt: TimeInterval) {
+        guard let current = active, current.id == id, !current.accepted,
+              FileTransferRules.offerTimedOut(offeredAt: offeredAt, now: ProcessInfo.processInfo.systemUptime) else { return }
+        waiting.removeAll()
+        fail(current, message: "\(current.name): that Mac didn't answer. It may need a newer paneshare.")
     }
 
     private func pump() {

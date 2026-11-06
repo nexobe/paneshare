@@ -32,6 +32,14 @@ public enum FileTransferRules {
     public static let chunkBytes = 256 * 1024
     /// Chunks that may be unacknowledged, so that input isn't stuck behind a long send queue.
     public static let windowChunks = 4
+    /// Seconds a sender waits for the first answer to an offer. A Mac too old to receive in this
+    /// direction drops the offer without a word, so the sender stops waiting after this.
+    public static let offerTimeout: TimeInterval = 15
+
+    /// True when an offer made at `offeredAt` has had no answer for too long.
+    public static func offerTimedOut(offeredAt: TimeInterval, now: TimeInterval) -> Bool {
+        now - offeredAt >= offerTimeout
+    }
 
     /// A safe file name from what the other Mac sent, or nil if nothing usable is left.
     /// It keeps only the last path component, so a sent path can't leave the folder.

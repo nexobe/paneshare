@@ -36,6 +36,9 @@ final class ViewerSession: ObservableObject, Identifiable {
     private var pendingAppOpen: String?
     private var clipboard: ClipboardBridge?
     private var files: FileSender?
+    private var incoming: FileReceiver?
+    /// The latest file this host sent here.
+    @Published private(set) var lastReceivedFile: URL?
     /// The apps this host lets this Mac open. Empty if it offers none, or doesn't know how.
     @Published private(set) var apps: [RemoteApp] = []
     /// The latest file transfer message, shown under this host.
@@ -151,6 +154,16 @@ final class ViewerSession: ObservableObject, Identifiable {
         files?.stop()
         files = FileSender(send: { [weak self] in self?.channel?.send($0) },
                            status: { [weak self] in self?.fileStatus = $0 })
+        incoming?.discard()
+        incoming = FileReceiver(
+            settingKey: FileReceiver.fromHostsKey,
+            hasOpenStream: { [weak self] in self.map { !$0.byWindow.isEmpty } ?? false },
+            reply: { [weak self] in self?.send(.fileReply, $0) },
+            finished: { [weak self] url, _ in
+                guard let self else { return }
+                self.lastReceivedFile = url
+                self.fileStatus = "\(self.host.name) sent \(url.lastPathComponent)."
+            })
     }
 
     func disconnect() {
@@ -161,6 +174,8 @@ final class ViewerSession: ObservableObject, Identifiable {
         clipboard = nil
         files?.stop()
         files = nil
+        incoming?.discard()
+        incoming = nil
         wanted = false
         backoff.reset()
         connectedAt = nil
@@ -190,6 +205,8 @@ final class ViewerSession: ObservableObject, Identifiable {
         clipboard = nil
         files?.stop()
         files = nil
+        incoming?.discard()
+        incoming = nil
         channel = nil
         backoff.sessionEnded(lasted: connectedAt.map { ProcessInfo.processInfo.systemUptime - $0 })
         connectedAt = nil
@@ -255,6 +272,12 @@ final class ViewerSession: ObservableObject, Identifiable {
             if let result = try? MessageCodec.decode(OpenAppResult.self, from: frame) { appOpened(result) }
         case .fileReply:
             if let reply = try? MessageCodec.decode(FileReply.self, from: frame) { files?.reply(reply) }
+        case .fileOffer:
+            if let offer = try? MessageCodec.decode(FileOffer.self, from: frame) { incoming?.offer(offer) }
+        case .fileChunk:
+            incoming?.chunk(frame.payload)
+        case .fileEnd:
+            if let end = try? MessageCodec.decode(FileEnd.self, from: frame) { incoming?.end(end) }
         case .windowList:
             windows = (try? MessageCodec.decode([WindowInfo].self, from: frame)) ?? []
             // A window the host stopped offering closes here too.

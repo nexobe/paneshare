@@ -149,15 +149,31 @@ struct HostPanel: View {
                 .font(.caption).foregroundStyle(.secondary)
             if let message = host.pairingMessage { Text(message).font(.callout).foregroundStyle(.secondary) }
             ForEach(host.peers) { peer in
-                HStack {
-                    Image(systemName: "dot.radiowaves.left.and.right").foregroundStyle(.green)
-                    Text(peer.viewerName)
-                    if !peer.movedAwayTitles.isEmpty {
-                        Button("Bring Back") { peer.bringBackWindows() }
-                            .help("Moved off this screen: " + peer.movedAwayTitles.joined(separator: ", "))
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack {
+                        Image(systemName: "dot.radiowaves.left.and.right").foregroundStyle(.green)
+                        Text(peer.viewerName)
+                        if !peer.movedAwayTitles.isEmpty {
+                            Button("Bring Back") { peer.bringBackWindows() }
+                                .help("Moved off this screen: " + peer.movedAwayTitles.joined(separator: ", "))
+                        }
+                        Text(peer.sharedTitles.isEmpty ? "connected" : "viewing " + peer.sharedTitles.joined(separator: ", "))
+                            .font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        if peer.canSendFiles {
+                            Button("Send Files…") { chooseFiles(for: peer) }
+                                .help("Send files to \(peer.viewerName). That Mac must accept files and have one of your windows open.")
+                        }
                     }
-                    Text(peer.sharedTitles.isEmpty ? "connected" : "viewing " + peer.sharedTitles.joined(separator: ", "))
-                        .font(.caption).foregroundStyle(.secondary)
+                    if let status = peer.sendStatus {
+                        Text(status).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                .dropDestination(for: URL.self) { urls, _ in
+                    let files = urls.filter(\.isFileURL)
+                    guard peer.canSendFiles, !files.isEmpty else { return false }
+                    peer.sendFiles(files)
+                    return true
                 }
             }
             ForEach(trust.viewers) { v in
@@ -171,6 +187,19 @@ struct HostPanel: View {
             if trust.viewers.isEmpty { Text("No paired viewers yet.").foregroundStyle(.secondary) }
         }
     }
+}
+
+/// Files the host user picks for one viewer. Only regular files; folders are refused by the sender.
+@MainActor
+private func chooseFiles(for peer: HostPeer) {
+    let panel = NSOpenPanel()
+    panel.canChooseFiles = true
+    panel.canChooseDirectories = false
+    panel.allowsMultipleSelection = true
+    panel.prompt = "Send"
+    panel.message = "Files go to Downloads/paneshare on \(peer.viewerName)."
+    guard panel.runModal() == .OK, !panel.urls.isEmpty else { return }
+    peer.sendFiles(panel.urls)
 }
 
 struct Banner: View {
