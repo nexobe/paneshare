@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- paneshare app icon, master artwork (64 px and up). 1024 x 1024 canvas, 824 pt body on the macOS
+     icon grid; the body outline comes from scripts/icon/squircle.py. Concept: a window pane lifting
+     off one screen and moving across to another. Rendered by scripts/icon/build-icon.sh. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <path id="body" d="M924.0 512.0 L923.9 605.1 L923.6 637.9 L923.1 662.1 L922.5 682.0 L921.6 699.2 L920.5 714.4 L919.3 728.3 L917.8 740.9 L916.2 752.6 L914.3 763.5 L912.3 773.7 L910.1 783.3 L907.6 792.4 L905.0 801.0 L902.1 809.1 L899.0 816.8 L895.7 824.1 L892.2 831.1 L888.5 837.7 L884.6 844.0 L880.4 850.0 L875.9 855.8 L871.3 861.2 L866.4 866.4 L861.2 871.3 L855.8 875.9 L850.0 880.4 L844.0 884.6 L837.7 888.5 L831.1 892.2 L824.1 895.7 L816.8 899.0 L809.1 902.1 L801.0 905.0 L792.4 907.6 L783.3 910.1 L773.7 912.3 L763.5 914.3 L752.6 916.2 L740.9 917.8 L728.3 919.3 L714.4 920.5 L699.2 921.6 L682.0 922.5 L662.1 923.1 L637.9 923.6 L605.1 923.9 L512.0 924.0 L418.9 923.9 L386.1 923.6 L361.9 923.1 L342.0 922.5 L324.8 921.6 L309.6 920.5 L295.7 919.3 L283.1 917.8 L271.4 916.2 L260.5 914.3 L250.3 912.3 L240.7 910.1 L231.6 907.6 L223.0 905.0 L214.9 902.1 L207.2 899.0 L199.9 895.7 L192.9 892.2 L186.3 888.5 L180.0 884.6 L174.0 880.4 L168.2 875.9 L162.8 871.3 L157.6 866.4 L152.7 861.2 L148.1 855.8 L143.6 850.0 L139.4 844.0 L135.5 837.7 L131.8 831.1 L128.3 824.1 L125.0 816.8 L121.9 809.1 L119.0 801.0 L116.4 792.4 L113.9 783.3 L111.7 773.7 L109.7 763.5 L107.8 752.6 L106.2 740.9 L104.7 728.3 L103.5 714.4 L102.4 699.2 L101.5 682.0 L100.9 662.1 L100.4 637.9 L100.1 605.1 L100.0 512.0 L100.1 418.9 L100.4 386.1 L100.9 361.9 L101.5 342.0 L102.4 324.8 L103.5 309.6 L104.7 295.7 L106.2 283.1 L107.8 271.4 L109.7 260.5 L111.7 250.3 L113.9 240.7 L116.4 231.6 L119.0 223.0 L121.9 214.9 L125.0 207.2 L128.3 199.9 L131.8 192.9 L135.5 186.3 L139.4 180.0 L143.6 174.0 L148.1 168.2 L152.7 162.8 L157.6 157.6 L162.8 152.7 L168.2 148.1 L174.0 143.6 L180.0 139.4 L186.3 135.5 L192.9 131.8 L199.9 128.3 L207.2 125.0 L214.9 121.9 L223.0 119.0 L231.6 116.4 L240.7 113.9 L250.3 111.7 L260.5 109.7 L271.4 107.8 L283.1 106.2 L295.7 104.7 L309.6 103.5 L324.8 102.4 L342.0 101.5 L361.9 100.9 L386.1 100.4 L418.9 100.1 L512.0 100.0 L605.1 100.1 L637.9 100.4 L662.1 100.9 L682.0 101.5 L699.2 102.4 L714.4 103.5 L728.3 104.7 L740.9 106.2 L752.6 107.8 L763.5 109.7 L773.7 111.7 L783.3 113.9 L792.4 116.4 L801.0 119.0 L809.1 121.9 L816.8 125.0 L824.1 128.3 L831.1 131.8 L837.7 135.5 L844.0 139.4 L850.0 143.6 L855.8 148.1 L861.2 152.7 L866.4 157.6 L871.3 162.8 L875.9 168.2 L880.4 174.0 L884.6 180.0 L888.5 186.3 L892.2 192.9 L895.7 199.9 L899.0 207.2 L902.1 214.9 L905.0 223.0 L907.6 231.6 L910.1 240.7 L912.3 250.3 L914.3 260.5 L916.2 271.4 L917.8 283.1 L919.3 295.7 L920.5 309.6 L921.6 324.8 L922.5 342.0 L923.1 361.9 L923.6 386.1 L923.9 418.9 Z"/>
+    <clipPath id="clip"><use href="#body"/></clipPath>
+
+    <linearGradient id="bg" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#3A2BD8"/>
+      <stop offset="0.55" stop-color="#22198F"/>
+      <stop offset="1" stop-color="#0C1452"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.18" r="0.62">
+      <stop offset="0" stop-color="#9D8CFF" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#9D8CFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.38"/>
+      <stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0.04"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.25"/>
+    </linearGradient>
+
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.06"/>
+    </linearGradient>
+    <linearGradient id="landing" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5CF2FF" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#5CF2FF" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="trail" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#3FE6FF" stop-opacity="0"/>
+      <stop offset="0.45" stop-color="#3FE6FF" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#FF6BE0" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="pane" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E4E2FF"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3FE6FF"/>
+      <stop offset="1" stop-color="#FF6BE0"/>
+    </linearGradient>
+
+    <filter id="iconShadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000000" flood-opacity="0.32"/>
+    </filter>
+    <filter id="paneShadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#05082E" flood-opacity="0.55"/>
+    </filter>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+  </defs>
+
+  <!-- Body -->
+  <use href="#body" fill="url(#bg)" filter="url(#iconShadow)"/>
+  <g clip-path="url(#clip)">
+    <rect width="1024" height="1024" fill="url(#glow)"/>
+
+    <!-- Two screens -->
+    <g stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="12" stroke-linejoin="round">
+      <rect x="150" y="540" width="300" height="196" rx="26" fill="url(#glass)"/>
+      <rect x="574" y="540" width="300" height="196" rx="26" fill="url(#glass)"/>
+    </g>
+    <g fill="#FFFFFF" fill-opacity="0.5">
+      <rect x="284" y="736" width="32" height="44"/>
+      <rect x="236" y="776" width="128" height="18" rx="9"/>
+      <rect x="708" y="736" width="32" height="44"/>
+      <rect x="660" y="776" width="128" height="18" rx="9"/>
+    </g>
+    <!-- Where the pane lands -->
+    <rect x="612" y="578" width="224" height="120" rx="14" fill="url(#landing)"/>
+    <!-- The slot it left -->
+    <rect x="188" y="578" width="224" height="120" rx="14" fill="none" stroke="#FFFFFF" stroke-opacity="0.35"
+          stroke-width="6" stroke-dasharray="18 14"/>
+
+    <!-- Trail: up out of the left screen, over the top, down into the right one -->
+    <path d="M300 612 C 296 360, 450 236, 612 282" fill="none" stroke="url(#trail)" stroke-width="58"
+          stroke-linecap="round" filter="url(#soft)" opacity="0.7"/>
+    <path d="M300 612 C 296 360, 450 236, 612 282" fill="none" stroke="url(#trail)" stroke-width="22"
+          stroke-linecap="round"/>
+    <path d="M792 410 C 790 470, 760 520, 724 556" fill="none" stroke="#FF6BE0" stroke-opacity="0.55"
+          stroke-width="12" stroke-linecap="round" stroke-dasharray="4 26"/>
+
+    <!-- Ghosts of the pane along the way -->
+    <g fill="#FFFFFF">
+      <rect x="223" y="386" width="190" height="132" rx="18" opacity="0.14" transform="rotate(-22 318 452)"/>
+      <rect x="325" y="238" width="230" height="160" rx="20" opacity="0.26" transform="rotate(-8 440 318)"/>
+    </g>
+
+    <!-- The pane in flight, tipping down towards the right screen -->
+    <g transform="rotate(9 640 330)" filter="url(#paneShadow)">
+      <rect x="506" y="238" width="268" height="186" rx="22" fill="url(#pane)"/>
+      <path d="M528 238 H752 A22 22 0 0 1 774 260 V286 H506 V260 A22 22 0 0 1 528 238 Z" fill="url(#bar)"/>
+      <g fill="#2A2290" fill-opacity="0.28">
+        <rect x="534" y="314" width="150" height="16" rx="8"/>
+        <rect x="534" y="346" width="212" height="16" rx="8"/>
+        <rect x="534" y="378" width="176" height="16" rx="8"/>
+      </g>
+    </g>
+
+    <!-- Rim light and shade over everything -->
+    <use href="#body" fill="none" stroke="url(#rim)" stroke-width="6"/>
+  </g>
+</svg>

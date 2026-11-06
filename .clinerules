@@ -1,0 +1,70 @@
+# paneshare project intelligence
+
+## Non-negotiables
+- Clean room: never inspect, decompile or sniff another window-sharing product, and never copy its code, text or
+  assets. Never name the reference product in code, UI, docs or commit messages.
+- Only Apache-2.0, MIT or BSD-compatible code. Record every reuse in THIRD_PARTY.md, and put an attribution header on derived files.
+- Never push directly to main; work on a new branch and open a PR against main.
+- In the app: no Process/NSTask/shell, TLS pinning always on, and no listener while sharing is off.
+- Releases: secrets stay in the release Mac's Keychain (Developer ID key, asc/notarytool credentials, Sparkle EdDSA key);
+  scripts take only names and URLs from the environment and never upload. The updater stays off unless
+  `UpdateConfiguration` accepts the Info.plist (HTTPS, signed feed). Bump `HelperBundlePlan.revision` when helper
+  contents change. Build bundles live only in `*.noindex` folders and are unregistered from LaunchServices
+  (`scripts/lib/launchservices.sh`); only the installed copy may show in Spotlight or Launchpad.
+  The share-link listener (47822) runs only while a link or guest exists; it never sees the pinned device key.
+- No private APIs, with one approved exception: `CGVirtualDisplay`, only in `PaneshareVirtualDisplay`, looked up at
+  run time with type-encoding checks, behind the off-by-default "Virtual display" setting. Add no others.
+  That's why Dock helpers are ad hoc signed in process (`AdHocSigner`), never with `codesign`.
+- docs/SPEC.md is the only target-derived input. Use our own names, never the spec's product terms, in code and UI.
+
+## Workflow
+- Test with `swift build && swift test`. Without a Mac, the core builds on Linux; check macOS files with
+  `swiftc -frontend -parse -target arm64-apple-macosx14.0 FILE` (syntax only).
+- Commit each logical change separately. `git add -A` sweeps in docs, so stage paths explicitly.
+- When batch-editing with a script, assert every search string exists before replacing.
+- Never run a file edit and the git add/commit that depends on it in parallel; the commit can run first.
+  (Happened twice; after committing, check `git status --short` is clean.)
+- macOS-only code isn't type-checked on Linux: grep that every member you reference exists before committing.
+- Top-level type names must not be ones an Apple SDK uses or may add: macOS 26 Network added `WebSocket`, `TLS`,
+  `TCP`, `UDP`, `QUIC`, `IP`, `TLV`, `Coder`, `NetworkConnection`/`Listener`/`Browser`; SwiftUI has `ShareLink`,
+  `Tab`; AudioToolbox has `AudioCodec`. A clash is an "ambiguous for type lookup" error only on the new SDK. Use
+  specific names (`WebSocketCodec`, `ShareLinkRecord`, `AudioCodecKind`) or nest the type.
+
+## Code patterns
+- Background → main: `{ [weak self] x in guard let self else { return }; onMain { self.f(x) } }`.
+- Callbacks from replaceable objects (channels, encoders) must check identity on main before acting.
+- Channels from NWListener: set handlers, then `startReceiving()`.
+- Wire changes: add optional JSON fields only. Add a Core test for both the absent and present cases.
+  An incompatible change to a ceremony gets a new ALPN version (pairing is `paneshare-pair/2`).
+- Pairing: limits live in pure Core types (`PairingGate`, `PairRequestLimiter`), enforced on both sides;
+  the app classes only wire messages to them. Never show a host prompt without going through the limiter.
+- Keep video and audio off the main thread on both ends. Audio render callbacks don't allocate
+  (`AudioJitterBuffer.pull(frames:left:right:)`).
+- Anything an excluded app could leak (windows, sound) goes through `WindowPolicy.appRejection` first.
+- Anything that moves a host window must put it back when the stream ends (`HostStream.leaveVirtualDisplay`).
+- Browser guests: every grant is a pure Core rule (`ShareLinkStore`, `GuestPointer`) with tests. Never give guests
+  keys, audio or another window without a new scope the host turns on. Secrets go in the URL fragment, never
+  the path; the page uses no inline script (CSP) and sets text with `textContent` only.
+- Web viewer changes: run `scripts/web-viewer-e2e/run.sh` (needs ffmpeg, Chrome, python websockets).
+
+## Lessons
+- macOS 15+ SDKs declare CGPoint/CGSize/CGRect in CoreFoundation, so `import Foundation` alone hides
+  CoreGraphics' Swift overlay (CGRect.minX/width, CGRect(x:y:width:height:), .zero, Equatable). Any
+  non-AppKit file using CG geometry needs `#if canImport(CoreGraphics) import CoreGraphics #endif`.
+  The Linux build can't catch this.
+- Dependency manifests newer than Swift 5.10 break Xcode 15.3. Keep caps in Package.swift.
+- NSEvent and CG scroll-phase raw values differ. Convert through EventCodes.
+- performKeyEquivalent: intercept only Command chords, or keyUp is duplicated.
+- Never test with a RandomNumberGenerator that always returns 0: `UInt32.random(in:)` rejection-samples forever.
+  Test formatting helpers directly instead.
+- Elligator 2 on curve25519 with Z = 2 has no exceptional input (−1/2 is a non-square); map(0) = 0 is low order
+  and must be rejected.
+- Rate limits that a tester will hit need a local, host-user-only reset (turning sharing on clears the pairing
+  limiter); document it in TESTING.
+- Text sharpness: check the whole chain (capture scale and format, chroma, rate and still-window refinement,
+  viewer size and filters). `debugOverlay` prints every stage; ask for its text before guessing.
+- Secure input pauses keyDown only, so a held key's keyUp still arrives (the injector doesn't track keys).
+- The viewer must ignore non-final `resized` replies, or a late mid-drag reply snaps the window back.
+- CSS `display` rules beat the `hidden` attribute; keep `[hidden] { display: none !important; }` in the viewer CSS.
+- RFC 6455's handshake example (`dGhlIHNhbXBsZSBub25jZQ==` → `s3pPLMBiTxaQ9kYGzzhZRbK+xOo=`) is the test vector;
+  check expected values against the RFC before "fixing" code.
