@@ -62,7 +62,8 @@ Asghar's MacBook Pro.
 | HEVC / H.264 low-latency encode, with fallback and recovery | Run on two Macs; fallback and recovery not confirmed. |
 | Keep the host awake (system and display idle sleep) while any stream is live | Written, not run. Hold counting unit-tested. |
 | Clipboard sync: plain text up to 1 MB, off by default, both Macs opt in, only while a remote window is in front, skips items marked private | Written, not run. Rules unit-tested. |
-| File drop: single files up to 2 GB from viewer to host, off by default, saved to `Downloads/paneshare` with a digest check and quarantine. It doesn't drop the file into the app itself, or send files from host to viewer. | Written, not run. Name safety, digest and pacing unit-tested. |
+| File drop: single files up to 2 GB from viewer to host, off by default, saved to `Downloads/paneshare` with a digest check and quarantine. It doesn't drop the file into the app itself. | Written, not run. Name safety, digest and pacing unit-tested. |
+| Send files from host to viewer: **Send Files…** or a drop on the viewer's row; the viewer must turn on its own setting (off by default) and have one of the host's windows open. Same limits, folder and checks as file drop. A Mac with no answer in 15 s is skipped. | Written, not run. Offer timeout unit-tested. |
 | Whole screen offers, off until ticked; **Open every screen** opens each in its own window, not one combined picture; rejected apps are left out and rechecked every 2 s | Written, not run. IDs and wire field unit-tested. |
 | Hardware decode into a native window titled after the source | Run on two Macs |
 | Bonjour discovery, plus pairing by address (Tailscale) | Bonjour run on two Macs; pairing by address not confirmed. |
@@ -159,7 +160,8 @@ planned LiveKit transport.
   are sent only when that window's app is frontmost. Key presses pause while secure input is on at the host.
 - **The clipboard stays put unless you ask:** sync is off by default and needs both Macs. Text moves only while a
   remote window is in front on the viewer, and items marked private stay on their Mac.
-- **Files need the host's say-so:** receiving is off by default. A sent name can't choose the folder or replace a
+- **Files need the receiver's say-so:** receiving is off by default on each side, with separate settings for files
+  from viewers and files from hosts. A sent name can't choose the folder or replace a
   file, and received files are quarantined so Gatekeeper still checks them.
 - **A whole screen is a wider grant:** it's off until the host ticks it. Rejected apps are left out of the picture,
   but one that opens during a stream can show for up to 2 seconds. Clicks can land anywhere on that screen.

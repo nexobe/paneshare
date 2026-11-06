@@ -2,13 +2,16 @@
 import Foundation
 import PaneshareCore
 
-/// Saves files dropped on a remote window into `Downloads/paneshare`, one at a time. A file gets its
-/// final name only after its size and digest match, and it is quarantined, so Gatekeeper still
-/// checks anything run from it. Off unless the host user turns it on.
+/// Saves files another Mac sends into `Downloads/paneshare`, one at a time. A file gets its final
+/// name only after its size and digest match, and it is quarantined, so Gatekeeper still checks
+/// anything run from it. The host uses it for files dropped on a remote window, and the viewer for
+/// files a host sends. Each side has its own setting, off unless the user turns it on.
 @MainActor
 final class FileReceiver {
-    /// UserDefaults key for the setting.
+    /// UserDefaults key for accepting files dropped on this Mac's shared windows (host side).
     nonisolated static let enabledKey = "receiveFiles"
+    /// UserDefaults key for accepting files from Macs this Mac connects to (viewer side).
+    nonisolated static let fromHostsKey = "receiveFilesFromHosts"
 
     private struct Active {
         let id: UInt32
@@ -19,12 +22,14 @@ final class FileReceiver {
     }
 
     private var active: Active?
+    private let settingKey: String
     private let hasOpenStream: () -> Bool
     private let reply: (FileReply) -> Void
     private let finished: (URL, UInt64) -> Void
 
-    init(hasOpenStream: @escaping () -> Bool, reply: @escaping (FileReply) -> Void,
+    init(settingKey: String, hasOpenStream: @escaping () -> Bool, reply: @escaping (FileReply) -> Void,
          finished: @escaping (URL, UInt64) -> Void) {
+        self.settingKey = settingKey
         self.hasOpenStream = hasOpenStream
         self.reply = reply
         self.finished = finished
@@ -32,7 +37,7 @@ final class FileReceiver {
 
     func offer(_ offer: FileOffer) {
         func refuse(_ reason: String) { reply(FileReply(id: offer.id, accepted: false, reason: reason)) }
-        guard UserDefaults.standard.bool(forKey: Self.enabledKey) else { return refuse("That Mac doesn't accept files. Turn it on in This Mac.") }
+        guard UserDefaults.standard.bool(forKey: settingKey) else { return refuse("That Mac doesn't accept files. Turn it on in This Mac.") }
         guard hasOpenStream() else { return refuse("No window is open.") }
         guard active == nil else { return refuse("Another file is arriving.") }
         guard offer.size <= FileTransferRules.maxBytes else { return refuse("Files can be up to 2 GB.") }
