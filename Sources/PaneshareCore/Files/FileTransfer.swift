@@ -35,6 +35,21 @@ public enum FileTransferRules {
     /// Seconds a sender waits for the first answer to an offer. A Mac too old to receive in this
     /// direction drops the offer without a word, so the sender stops waiting after this.
     public static let offerTimeout: TimeInterval = 15
+    /// Free space a receiving Mac keeps after a file lands, so a sent file can't fill its disk.
+    public static let reserveBytes: UInt64 = 1024 * 1024 * 1024
+
+    /// True when a file of `size` bytes fits in `free` bytes and still leaves `reserveBytes` free.
+    public static func hasRoom(free: Int64, size: UInt64) -> Bool {
+        guard free > 0 else { return false }
+        let (needed, overflow) = size.addingReportingOverflow(reserveBytes)
+        return !overflow && UInt64(free) >= needed
+    }
+
+    /// Whole percent of `received` out of `total`, from 0 to 100.
+    public static func percent(received: UInt64, total: UInt64) -> Int {
+        guard total > 0 else { return 100 }
+        return Int(min(received, total) * 100 / total)
+    }
 
     /// True when an offer made at `offeredAt` has had no answer for too long.
     public static func offerTimedOut(offeredAt: TimeInterval, now: TimeInterval) -> Bool {

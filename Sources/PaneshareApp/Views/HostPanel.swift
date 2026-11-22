@@ -168,6 +168,9 @@ struct HostPanel: View {
                     if let status = peer.sendStatus {
                         Text(status).font(.caption).foregroundStyle(.secondary)
                     }
+                    if let status = peer.receiveStatus {
+                        Text(status).font(.caption).foregroundStyle(.secondary)
+                    }
                 }
                 .dropDestination(for: URL.self) { urls, _ in
                     let files = urls.filter(\.isFileURL)

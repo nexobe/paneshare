@@ -28,6 +28,8 @@ final class HostPeer: Identifiable {
     private var outgoing: FileSender?
     /// The latest message about files this Mac sends to this viewer.
     private(set) var sendStatus: String?
+    /// Progress of a file this viewer is sending here, while it arrives.
+    private(set) var receiveStatus: String?
     private var openAppLimiter = OpenAppLimiter()
     var onEnded: ((HostPeer) -> Void)?
     var onChange: (() -> Void)?
@@ -86,8 +88,15 @@ final class HostPeer: Identifiable {
                     settingKey: FileReceiver.enabledKey,
                     hasOpenStream: { [weak self] in self.map { !$0.streams.isEmpty } ?? false },
                     reply: { [weak self] in self?.send(.fileReply, $0) },
+                    progress: { [weak self] name, percent in
+                        guard let self else { return }
+                        self.receiveStatus = "Receiving \(name): \(percent)%"
+                        self.onChange?()
+                    },
                     finished: { [weak self] url, _ in
                         guard let self else { return }
+                        self.receiveStatus = nil
+                        self.onChange?()
                         self.host?.fileReceived(url, from: self.viewerName)
                     })
                 outgoing = FileSender(
@@ -236,7 +245,8 @@ final class HostPeer: Identifiable {
         outgoing.enqueue(urls)
     }
 
-    var canSendFiles: Bool { saidHello && !ended && outgoing != nil }
+    /// The viewer can only accept files while it has one of this Mac's windows open.
+    var canSendFiles: Bool { saidHello && !ended && outgoing != nil && !streams.isEmpty }
 
     private func startClipboard() {
         let bridge = ClipboardBridge(
@@ -252,6 +262,7 @@ final class HostPeer: Identifiable {
         clipboard?.stop()
         clipboard = nil
         files?.discard()
+        receiveStatus = nil
         files = nil
         outgoing?.stop()
         outgoing = nil
@@ -301,6 +312,7 @@ final class HostPeer: Identifiable {
 
     private func closed() {
         files?.discard()
+        receiveStatus = nil
         files = nil
         outgoing?.stop()
         outgoing = nil

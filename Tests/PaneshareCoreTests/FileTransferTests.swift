@@ -87,4 +87,24 @@ final class FileTransferTests: XCTestCase {
         let full = FileReply(id: 7, accepted: true, reason: nil, received: 10, done: true)
         XCTAssertEqual(try JSONDecoder().decode(FileReply.self, from: JSONEncoder().encode(full)), full)
     }
+
+    func testReceiverKeepsOneGigabyteFree() {
+        let gb = FileTransferRules.reserveBytes
+        XCTAssertTrue(FileTransferRules.hasRoom(free: Int64(gb + 100), size: 100))
+        XCTAssertFalse(FileTransferRules.hasRoom(free: Int64(gb + 99), size: 100), "would leave less than 1 GB")
+        XCTAssertFalse(FileTransferRules.hasRoom(free: Int64(gb), size: 1))
+        XCTAssertFalse(FileTransferRules.hasRoom(free: 0, size: 0))
+        XCTAssertFalse(FileTransferRules.hasRoom(free: -1, size: 0))
+        XCTAssertFalse(FileTransferRules.hasRoom(free: .max, size: .max), "no overflow")
+    }
+
+    func testPercentIsWholeAndClamped() {
+        XCTAssertEqual(FileTransferRules.percent(received: 0, total: 1000), 0)
+        XCTAssertEqual(FileTransferRules.percent(received: 9, total: 1000), 0)
+        XCTAssertEqual(FileTransferRules.percent(received: 10, total: 1000), 1)
+        XCTAssertEqual(FileTransferRules.percent(received: 1000, total: 1000), 100)
+        XCTAssertEqual(FileTransferRules.percent(received: 2000, total: 1000), 100)
+        XCTAssertEqual(FileTransferRules.percent(received: 0, total: 0), 100)
+        XCTAssertEqual(FileTransferRules.percent(received: FileTransferRules.maxBytes / 2, total: FileTransferRules.maxBytes), 50)
+    }
 }

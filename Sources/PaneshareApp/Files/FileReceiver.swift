@@ -19,6 +19,7 @@ final class FileReceiver {
         let part: URL
         let handle: FileHandle
         var check: FileReceiveCheck
+        var shownPercent = -1
     }
 
     private var active: Active?
@@ -26,12 +27,16 @@ final class FileReceiver {
     private let hasOpenStream: () -> Bool
     private let reply: (FileReply) -> Void
     private let finished: (URL, UInt64) -> Void
+    /// The file name and whole percent received, each time the percent changes.
+    private let progress: (String, Int) -> Void
 
     init(settingKey: String, hasOpenStream: @escaping () -> Bool, reply: @escaping (FileReply) -> Void,
+         progress: @escaping (String, Int) -> Void = { _, _ in },
          finished: @escaping (URL, UInt64) -> Void) {
         self.settingKey = settingKey
         self.hasOpenStream = hasOpenStream
         self.reply = reply
+        self.progress = progress
         self.finished = finished
     }
 
@@ -46,7 +51,9 @@ final class FileReceiver {
             let folder = try Self.folder()
             let free = try folder.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey])
                 .volumeAvailableCapacityForImportantUsage ?? 0
-            guard free > Int64(offer.size) else { return refuse("That Mac doesn't have enough free space.") }
+            guard FileTransferRules.hasRoom(free: free, size: offer.size) else {
+                return refuse("That Mac doesn't have enough free space.")
+            }
             let part = folder.appendingPathComponent("\(UUID().uuidString).part")
             guard FileManager.default.createFile(atPath: part.path, contents: nil, attributes: [.posixPermissions: 0o600]) else {
                 return refuse("That Mac couldn't create the file.")
@@ -64,6 +71,11 @@ final class FileReceiver {
         do {
             try current.check.add(bytes)
             try current.handle.write(contentsOf: bytes)
+            let percent = FileTransferRules.percent(received: current.check.received, total: current.check.size)
+            if percent != current.shownPercent {
+                current.shownPercent = percent
+                progress(current.name, percent)
+            }
             active = current
             reply(FileReply(id: id, accepted: true, received: current.check.received))
         } catch {
