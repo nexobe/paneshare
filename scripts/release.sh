@@ -222,6 +222,7 @@ grep -qF "$DOWNLOAD_PREFIX$DMG_NAME" "$UPDATES/$FEED_NAME" || fail "appcast does
 step "Done"
 echo "App:      $APP (stapled)"
 echo "DMG:      $UPDATES/$DMG_NAME (signed, notarized, stapled)"
+echo "SHA-256:  $(shasum -a 256 "$UPDATES/$DMG_NAME" | cut -d ' ' -f 1)  (paste into the paneshare-releases GitHub Release body)"
 echo "Appcast:  $UPDATES/$FEED_NAME"
 echo
 echo "Nothing was uploaded. Upload the new and changed files in $UPDATES so that"
