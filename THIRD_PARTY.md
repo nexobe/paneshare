@@ -1,6 +1,8 @@
 # Third-party code, dependencies and design references
 
-paneshare is released under the MIT License (see `LICENSE`). Everything below is compatible with it.
+paneshare is released under the MIT License (see `LICENSE`), with six files under the Apache License 2.0
+(see `LICENSES/Apache-2.0.txt`). Those six are the adapted Sill files listed under "Adapted code" below. Everything
+below is compatible with both licenses.
 **No GPL, AGPL, LGPL, MPL, PolyForm or unlicensed code is copied.** Projects under those licenses were
 read only for design ideas, and none of their code or text is in this repository.
 
@@ -86,7 +88,9 @@ on Xcode 15.3 and later.
 | [webrtc-sdk/webrtc](https://github.com/webrtc-sdk/webrtc) (LiveKit's WebRTC build) | BSD-3-Clause, with its bundled third-party notices | Media transport under the LiveKit SDK |
 
 All three are compatible with Apache-2.0 and MIT. Their NOTICE files must be carried in the app bundle when
-they're added.
+they're added. Today no dependency or adapted source ships a NOTICE file, so the bundle carries only license texts:
+`make-app.sh` copies paneshare's `LICENSE`, `LICENSES/Apache-2.0.txt` and Sparkle's LICENSE into
+`Contents/Resources/Licenses`.
 
 ### Rectangle: MIT
 
@@ -151,6 +155,13 @@ No other private frameworks or symbols are used (for example, `_AXUIElementGetWi
 
 ## Target-derived input
 
-`docs/SPEC.md` is the sanitized functional spec from a separate clean-room analysis of public sources. It describes
-behaviour, Apple APIs and architecture only, and is the only input derived from the reference product. No code, text,
-names or assets from that product are in this repository.
+`docs/SPEC.md` is the sanitized functional spec derived from the reference product. A separate analyst wrote it on a local Mac
+from one public build: static analysis of the bundle layout, declared permissions, linked frameworks and imported
+APIs, plus a decompile of the product's small Dock helper. The main binary was not fully decompiled
+(`docs/SPEC.md`, "How to read this"). The spec is sanitized. It describes behaviour, Apple APIs and architecture
+only, with no decompiled code, pseudocode, symbol names, UI text or assets.
+
+No code, text, names or assets from that product are in this repository. The analyst's working notes and any
+decompiler output were never committed, here or in the private repository where paneshare was first built. The
+README section "How this started" gives the order of events, and what is not yet published about the coding
+agents' inputs.
