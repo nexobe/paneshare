@@ -119,9 +119,12 @@ private struct HostRow: View {
                     .fixedSize()
             }
             if let status = session.fileStatus {
+                Text(status).font(.caption).foregroundStyle(.secondary)
+            }
+            if let status = session.incomingStatus {
                 HStack {
                     Text(status).font(.caption).foregroundStyle(.secondary)
-                    if let file = session.lastReceivedFile, status.hasSuffix(file.lastPathComponent + ".") {
+                    if let file = session.lastReceivedFile {
                         Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([file]) }
                             .font(.caption)
                     }

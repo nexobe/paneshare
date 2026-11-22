@@ -41,8 +41,10 @@ final class ViewerSession: ObservableObject, Identifiable {
     @Published private(set) var lastReceivedFile: URL?
     /// The apps this host lets this Mac open. Empty if it offers none, or doesn't know how.
     @Published private(set) var apps: [RemoteApp] = []
-    /// The latest file transfer message, shown under this host.
+    /// The latest message about files sent from this Mac, or apps opened on the host.
     @Published private(set) var fileStatus: String?
+    /// The latest message about a file this host sends here.
+    @Published private(set) var incomingStatus: String?
     /// UserDefaults key for the `StreamQuality` new windows are opened with.
     nonisolated static let qualityKey = "streamQuality"
     /// UserDefaults key for lowering the bitrate on a slow network. Off unless the user turns it on.
@@ -159,10 +161,15 @@ final class ViewerSession: ObservableObject, Identifiable {
             settingKey: FileReceiver.fromHostsKey,
             hasOpenStream: { [weak self] in self.map { !$0.byWindow.isEmpty } ?? false },
             reply: { [weak self] in self?.send(.fileReply, $0) },
+            progress: { [weak self] name, percent in
+                guard let self else { return }
+                self.lastReceivedFile = nil
+                self.incomingStatus = "Receiving \(name) from \(self.host.name): \(percent)%"
+            },
             finished: { [weak self] url, _ in
                 guard let self else { return }
                 self.lastReceivedFile = url
-                self.fileStatus = "\(self.host.name) sent \(url.lastPathComponent)."
+                self.incomingStatus = "\(self.host.name) sent \(url.lastPathComponent)."
             })
     }
 

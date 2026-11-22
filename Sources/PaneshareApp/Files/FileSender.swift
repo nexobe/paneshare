@@ -14,6 +14,7 @@ final class FileSender {
         var pacer: FileSendPacer
         var hasher = SHA256()
         var accepted = false
+        var shownPercent = -1
     }
 
     private var waiting: [URL] = []
@@ -35,16 +36,19 @@ final class FileSender {
     func reply(_ reply: FileReply) {
         guard var current = active, current.id == reply.id else { return }
         guard reply.accepted else {
-            finish(message: "\(current.name): \(reply.reason ?? "refused.")")
+            // Clear the queue first: `finish` starts the next file.
             waiting.removeAll()
-            return
+            return finish(message: "\(current.name): \(reply.reason ?? "refused.")")
         }
         if reply.done == true { return finish(message: "\(current.name) saved in Downloads/paneshare on that Mac.") }
         current.accepted = true
         if let received = reply.received {
             current.pacer.acknowledge(received)
-            let total = max(current.pacer.size, 1)
-            status("Sending \(current.name): \(received * 100 / total)%")
+            let percent = FileTransferRules.percent(received: received, total: current.pacer.size)
+            if percent != current.shownPercent {
+                current.shownPercent = percent
+                status("Sending \(current.name): \(percent)%")
+            }
         }
         active = current
         pump()
