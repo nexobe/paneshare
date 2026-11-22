@@ -75,7 +75,7 @@ struct AboutPanel: View {
             } header: {
                 Text("Files")
             } footer: {
-                Text("Single files up to 2 GB go to Downloads/paneshare on this Mac and never replace a file there. They are marked as downloaded, so macOS checks apps and scripts before they run. A Mac you share with can send files only while one of your windows is open on it. A Mac you connect to can send them only while one of its windows is open here.")
+                Text("Single files up to 2 GB go to Downloads/paneshare on this Mac and never replace a file there. They are marked as downloaded, so macOS checks apps and scripts before they run. A Mac you share with can start sending files only while one of your windows is open on it. A Mac you connect to can start sending them only while one of its windows is open here.")
             }
             StartupSection()
             Section {
