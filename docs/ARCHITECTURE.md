@@ -880,5 +880,5 @@ Full procedure and the reasoning: docs/RELEASING.md.
   first launch before any automatic check (`UpdateConsent`). Installs always ask
   (`SUAllowsAutomaticUpdates` off), and no system profile is sent. The app menu has **Check for Updates…** and
   **Check for Updates Automatically**.
-- **Feed host.** Any public static HTTPS host; the private repository's releases can't serve anonymous users.
-  RELEASING §3 compares a public releases repo with Pages, Release assets, and Cloudflare Pages.
+- **Feed host.** Any public static HTTPS host works. The chosen one is GitHub Pages of the public
+  `nexobe/paneshare-releases` repo; RELEASING §3 compares it with Release assets and Cloudflare Pages.

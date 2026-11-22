@@ -95,6 +95,10 @@ if [ ! -f "$SPARKLE_LICENSE" ]; then
 fi
 mkdir -p "$APP/Contents/Resources/Licenses"
 cp "$SPARKLE_LICENSE" "$APP/Contents/Resources/Licenses/Sparkle.txt"
+# The six files adapted from Sill stay under Apache-2.0 (THIRD_PARTY.md), and Apache-2.0 4(a) requires its
+# text to ship with the binary. Sill ships no NOTICE file, so there is none to copy.
+cp "$ROOT/LICENSES/Apache-2.0.txt" "$APP/Contents/Resources/Licenses/Apache-2.0.txt"
+cp "$ROOT/LICENSE" "$APP/Contents/Resources/Licenses/paneshare-MIT.txt"
 
 if [ "$IDENTITY" = "-" ]; then
   # Ad hoc: no Apple account needed, and Gatekeeper doesn't assess a bundle built locally. Sparkle

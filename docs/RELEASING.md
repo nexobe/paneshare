@@ -50,7 +50,8 @@ key profile in the keychain. `release.sh` runs, for the zipped app and then the 
 asc notarization submit --file <file> --wait --timeout 30m --output json
 ```
 
-and requires `"status": "Accepted"` in the JSON. That exact command notarized a hand-signed DMG of fb88767.
+and requires `"status": "Accepted"` in the JSON. That exact command notarized a hand-signed DMG of an earlier
+development build.
 Nothing else to set up; `PANESHARE_ASC` points at another `asc` binary if it isn't on `PATH`.
 
 **Fallback: `xcrun notarytool`**, chosen with `PANESHARE_NOTARY_TOOL=notarytool` plus
@@ -152,10 +153,18 @@ Then upload the new and changed files from `build/updates/` (the DMG, `appcast.x
 older DMGs in it for delta updates and to keep earlier entries. Optionally tag the commit:
 `git tag v0.2.0 && git push origin v0.2.0`.
 
+Then make a GitHub Release for the version on `nexobe/paneshare-releases`. Paste the DMG's SHA-256 into the
+release body. `release.sh` prints it in its summary (`SHA-256:` line); `shasum -a 256 build/updates/paneshare-<version>.dmg`
+prints it again. Put it in the release body, not the Sparkle release notes: `generate_appcast` signs those notes,
+and editing them after that breaks the signature. Users compare this value with the "Verify this build" box in
+the README.
+
 ## 3. Hosting the feed (free options)
 
-Users' copies fetch the feed and the DMGs without credentials, so **the private source repository's GitHub
-Releases won't work**: those URLs need a login. Any static HTTPS host does. None of these are set up; choose one.
+Users' copies fetch the feed and the DMGs without credentials, so any static HTTPS host works. **The chosen host
+is option A**: GitHub Pages of the public `nexobe/paneshare-releases` repo, with the feed at
+`https://nexobe.github.io/paneshare-releases/appcast.xml`. Keep the feed and DMGs there, apart from the source
+repository, so a source-repo change can't move the feed URL that every build has baked in.
 
 | Option | Feed URL | DMG URL | Limits (free) | Upload |
 | --- | --- | --- | --- | --- |
@@ -163,7 +172,7 @@ Releases won't work**: those URLs need a login. Any static HTTPS host does. None
 | **B. Public releases repo, DMGs as GitHub Release assets** | Pages as in A (or the repo's raw URL) | `https://github.com/<owner>/paneshare-releases/releases/download/v0.2.0/` | 2 GiB per asset | Set `PANESHARE_DOWNLOAD_URL_PREFIX` to that release's URL. The prefix applies to every entry `generate_appcast` writes, so keep only the newest DMG in `build/updates` (the feed then lists one version, and deltas are off). |
 | **C. Cloudflare Pages** | `https://<project>.pages.dev/appcast.xml` (or a custom domain) | same folder | 25 MiB per file, 20,000 files; no bandwidth cap | `npx wrangler pages deploy build/updates --project-name <project>`. Check the DMG stays under 25 MiB. |
 
-Only the DMGs, the appcast and release notes go public; the source stays private. Whatever the host, it must be
+The source repository `nexobe/paneshare` is public too, but it holds no release files. Whatever the host, it must be
 HTTPS: the app refuses a non-HTTPS feed, and Sparkle verifies the EdDSA signatures of the feed and of each DMG
 before using them, so a compromised host can't push code or redirect users elsewhere.
 
@@ -193,7 +202,7 @@ in process. We checked whether that still works once paneshare itself is hardene
 **Expected:** it does, with nothing more than defensive changes. A pre-signed template wouldn't work for
 per-app tiles (see "Plan B" below).
 
-**Verified so far:** on the release Mac, a hand-signed fb88767 (app and helper template with
+**Verified so far:** on the release Mac, a hand-signed earlier development build (app and helper template with
 `--options runtime --timestamp`, then a signed DMG) was notarized with `asc` (Accepted), stapled, and
 `spctl` reported `accepted, source=Notarized Developer ID`.
 

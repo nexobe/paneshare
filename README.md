@@ -9,20 +9,51 @@ Command-Tab entry. Traffic is end-to-end encrypted and mutually authenticated be
 server, account or relay. Someone without paneshare can also view one window in a browser through a share link
 (same LAN or tailnet), with their own pointer.
 
+## Verify this build
+
+Release DMGs are signed with Developer ID by NEXOBE INC, team ID **`TV289JZ58M`**, and notarized by Apple. Each
+release on [`nexobe/paneshare-releases`](https://github.com/nexobe/paneshare-releases/releases) lists the DMG's
+SHA-256. Check a download before you open it:
+
+```bash
+shasum -a 256 paneshare-<version>.dmg                      # same value as the release page
+spctl -a -vv -t open --context context:primary-signature paneshare-<version>.dmg   # accepted, source=Notarized Developer ID
+xcrun stapler validate paneshare-<version>.dmg             # The validate action worked!
+```
+
+After you install it:
+
+```bash
+codesign -dv --verbose=4 /Applications/paneshare.app       # TeamIdentifier=TV289JZ58M
+spctl -a -vv -t exec /Applications/paneshare.app           # accepted, source=Notarized Developer ID
+```
+
 ## How this started
 
 On November 4, 2026, Asghar Ali (NEXOBE) wanted a way to use a window from one Mac on another, as a
 real window instead of a whole-screen share. The question was simple: could we build our own, clean-room, in a day?
 
-paneshare is built clean-room. The spec ([`docs/SPEC.md`](docs/SPEC.md)) was written only from public information:
-product pages, docs, pricing and observed behaviour. No other product's
-code, binaries or assets were used. The code was written by AI coding agents (Cursor cloud agents on Claude Opus)
-driven by gstack, Asghar's virtual product and engineering team, against that spec.
+paneshare uses a clean-room split, with two separate roles:
+
+- **The analyst** worked on a local Mac. It studied one public build of an existing window-sharing app: static
+  analysis of the bundle layout, declared permissions, linked frameworks and imported APIs, and a decompile of the
+  app's small Dock helper. The main binary was not fully decompiled. The analyst then wrote a sanitized functional
+  spec, [`docs/SPEC.md`](docs/SPEC.md). It says what the product does and which Apple APIs can do it. It contains no
+  decompiled code, pseudocode, symbol names, UI text, assets or branding from that product.
+- **The coding agents** (Cursor cloud agents on Claude Opus, driven by gstack, Asghar's virtual product and
+  engineering team) ran in the cloud and wrote the code.
+
+One person, Asghar, orchestrated both. The first code was committed between 08:37 and 09:11 UTC. The sanitized
+spec was committed at 09:18 UTC. No teardown notes, decompiler output or binaries from the analysis were ever
+committed, here or in the private repository where paneshare was first built. We have not yet published a review
+of the coding agents' session logs, so this page makes no claim about every input they got.
+
+No code, text, names or assets from the other product are in this repository.
 
 What happened, in order, all on Nov 4, 2026:
 
-1. **Spec and architecture.** A study of public sources and of open-source building blocks,
-   then [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): components, wire protocol v1, threat model, latency
+1. **Spec and architecture.** The sanitized spec, a study of open-source building blocks, then
+   [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): components, wire protocol v1, threat model, latency
    budget and test plan.
 2. **MVP.** Window picker, per-window capture, HEVC/H.264 encode and decode, native viewer windows, input
    forwarding, resize, Bonjour discovery and mutual-TLS pairing. The first Mac build hit macOS 15 SDK errors
@@ -38,7 +69,7 @@ What happened, in order, all on Nov 4, 2026:
 
 ## Status
 
-**Working MVP, notarized.** As of Nov 4, 2026, commit `3569e42` builds with 0 errors on Xcode 27 (macOS 27 SDK).
+**Working MVP, notarized.** As of Nov 4, 2026, the app builds with 0 errors on Xcode 27 (macOS 27 SDK).
 It's signed with Developer ID, notarized by Apple (Accepted), stapled and passes Gatekeeper. It's installed on
 Asghar's MacBook Pro.
 
@@ -46,9 +77,12 @@ Asghar's MacBook Pro.
   Sharp text and pairing v2 were built and installed. They still need a test against a second Mac running this build.
 - **Built but not yet tested on two Macs:** app audio, the virtual display, share links, Dock helpers from a
   downloaded copy, and auto-update.
-- **Not live yet:** auto-update needs a public host for the update feed (for example GitHub Pages). It isn't set up,
-  so installed builds don't check for updates.
-- **License:** MIT (see [`LICENSE`](LICENSE)). It isn't for the Mac App
+- **Not live yet:** auto-update. The feed will live at `https://nexobe.github.io/paneshare-releases/appcast.xml`
+  (GitHub Pages of a public releases repo, RELEASING §3). No release is published there yet, so installed builds
+  don't check for updates.
+- **License:** MIT (see [`LICENSE`](LICENSE)), with six adapted files under Apache-2.0
+  ([`LICENSES/Apache-2.0.txt`](LICENSES/Apache-2.0.txt); the files are listed under "Third-party code and
+  license" below). It isn't for the Mac App
   Store: it uses a private virtual-display API and controls other apps' input, so it ships as a notarized DMG.
 - **Unit tests:** the platform-neutral core (`PaneshareCore`) passes 175 tests on Swift 6.0.3 and 6.2.3 on Linux
   and 176 on Xcode 27. GitHub Actions is disabled on the repo, so CI doesn't run. The manual plan is in [`docs/TESTING.md`](docs/TESTING.md).
@@ -77,7 +111,7 @@ Asghar's MacBook Pro.
 | Virtual display for headless hosts and windows bigger than the host's screen (setting: Off / When needed / Always) | Written, not run. Planner and type-encoding checks unit-tested. Uses a private API (risk 9). |
 | Share links: one window in a browser over LAN or Tailscale (HTTPS, self-signed, one-time token, WebCodecs H.264), view-only by default with a revocable pointer-and-click switch, expiry, guest list and kick | Written; Swift side not run. Web stack and link store unit-tested; page checked in headless Chrome. |
 | App icon (original vector art, every size) and Dock helper icons with a ring in the source Mac's colour | Built. Icon rendered and checked at 16–1024 px; helper layout unit-tested, AppKit drawing not run. |
-| Auto-update (Sparkle 2, EdDSA-signed feed and archives, daily checks after first-launch consent) and a signed, notarized DMG release (`scripts/release.sh`) | Written, not run. Update configuration and consent unit-tested; release script dry-run on Linux with stub tools. A hand-signed fb88767 DMG was notarized (`asc`, Accepted) and passed `spctl`; helpers launching from a downloaded copy on a second Mac is the open check (RELEASING §5, `--dock-helper-selftest`). |
+| Auto-update (Sparkle 2, EdDSA-signed feed and archives, daily checks after first-launch consent) and a signed, notarized DMG release (`scripts/release.sh`) | Written, not run. Update configuration and consent unit-tested; release script dry-run on Linux with stub tools. A hand-signed DMG of an earlier development build was notarized (`asc`, Accepted) and passed `spctl`; helpers launching from a downloaded copy on a second Mac is the open check (RELEASING §5, `--dock-helper-selftest`). |
 
 ## Build
 
@@ -217,8 +251,8 @@ planned LiveKit transport.
     is on, a guest's clicks move the host's real cursor. Guests get no sound, no keyboard, and H.264 only
     (no 4:4:4), so text is a little softer than in the native viewer. Share links don't reach the internet; that's
     a design only ([`docs/SHARE-LINKS-INTERNET.md`](docs/SHARE-LINKS-INTERNET.md)).
-11. **Updates depend on the feed host and the signing keys.** The private repository can't host the feed, so a
-    public static host is needed (RELEASING §3). Losing the Sparkle key *and* the Developer ID certificate would
+11. **Updates depend on the feed host and the signing keys.** The feed and DMGs live in a separate public
+    releases repo on GitHub Pages (RELEASING §3). Losing the Sparkle key *and* the Developer ID certificate would
     strand installed copies. Back both up (RELEASING §1). The audio-input entitlement for the process tap under
     the hardened runtime is a precaution, and still unverified.
 
@@ -233,16 +267,27 @@ planned LiveKit transport.
 7. Take-over mode (stream a whole virtual desktop), building on the virtual display.
 8. Share links: Opus audio and an optional keyboard scope for guests, a trusted certificate via `tailscale cert`,
    and internet links per `docs/SHARE-LINKS-INTERNET.md`.
-9. Run the first signed release (TESTING §4.10) and pick a feed host (RELEASING §3); then the data-protection
+9. Run the first signed release (TESTING §4.10) and publish it to `nexobe/paneshare-releases` (RELEASING §3); then the data-protection
    keychain (needs a provisioning profile) and Swift 6 language mode.
 
 ## Third-party code and license
 
 Third-party code, dependencies and design references, with their licenses, are listed in
-[`THIRD_PARTY.md`](THIRD_PARTY.md). All of it is Apache-2.0, MIT or BSD, with no GPL or AGPL code. The project
-is released under the [MIT License](LICENSE).
+[`THIRD_PARTY.md`](THIRD_PARTY.md). All of it is Apache-2.0, MIT or BSD, with no GPL or AGPL code.
 
-The design follows the clean-room functional spec [`docs/SPEC.md`](docs/SPEC.md).
+The project is released under the [MIT License](LICENSE), with one exception. These six files are adapted from
+[Sill](https://github.com/Saffsanity/sill) and stay under the Apache License 2.0
+([`LICENSES/Apache-2.0.txt`](LICENSES/Apache-2.0.txt)). Each one says so in a comment.
+
+- `Sources/PaneshareTransport/PinnedTLS.swift`
+- `Sources/PaneshareEncode/VideoEncoder.swift`
+- `Sources/PaneshareInput/AXWindow.swift`
+- `Sources/PaneshareInput/EventInjector.swift`
+- `Sources/PaneshareVirtualDisplay/VirtualDisplay.swift`
+- `Sources/PaneshareCore/Geometry/VirtualDisplayPlanner.swift` (the `ObjCTypeEncoding` part)
+
+The design follows the sanitized functional spec [`docs/SPEC.md`](docs/SPEC.md). "How this started" above says
+how it was made.
 
 To report a security problem, see [`SECURITY.md`](SECURITY.md). To contribute, see
 [`CONTRIBUTING.md`](CONTRIBUTING.md).
