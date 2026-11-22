@@ -1,6 +1,6 @@
 # paneshare
 
-Share one macOS window between Macs as a native window. Clean-room, MIT-licensed, by NEXOBE.
+Share one macOS window between Macs as a native window. Open source (MIT, six files Apache-2.0), by NEXOBE.
 
 Read `.clinerules` first. It holds the non-negotiables, code patterns and lessons. `README.md` covers the product and
 the security model. `docs/TESTING.md` is the manual test plan. `docs/RELEASING.md` covers releases.

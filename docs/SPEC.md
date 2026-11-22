@@ -1,4 +1,4 @@
-# paneshare: clean-room functional spec (v1)
+# paneshare: sanitized functional spec (v1)
 
 Written: 2026-11-04 (America/Chicago). Author: the dirty-room analyst (gstack).
 Audience: the coding agent building nexobe/paneshare in Swift for macOS 14 (Sonoma) or later.

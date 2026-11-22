@@ -1,6 +1,6 @@
 # paneshare
 
-Share individual macOS windows between Macs as native windows. Clean-room and open source (MIT), by NEXOBE.
+Share individual macOS windows between Macs as native windows. Open source (MIT), no account, no server, by NEXOBE.
 
 Pick a window on one Mac (the **host**). It opens on another Mac (the **viewer**) as a real `NSWindow` with
 the source window's title, sharp at the viewer's backing scale. You can click, type, scroll and resize it.
@@ -31,9 +31,9 @@ spctl -a -vv -t exec /Applications/paneshare.app           # accepted, source=No
 ## How this started
 
 On November 4, 2026, Asghar Ali (NEXOBE) wanted a way to use a window from one Mac on another, as a
-real window instead of a whole-screen share. The question was simple: could we build our own, clean-room, in a day?
+real window instead of a whole-screen share. The question was simple: could we build our own in a day?
 
-paneshare uses a clean-room split, with two separate roles:
+paneshare was built in two separate roles:
 
 - **The analyst** worked on a local Mac. It studied one public build of an existing window-sharing app: static
   analysis of the bundle layout, declared permissions, linked frameworks and imported APIs, and a decompile of the
