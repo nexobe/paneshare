@@ -1,7 +1,7 @@
 # paneshare project intelligence
 
 ## Non-negotiables
-- Clean room: never inspect, decompile or sniff another window-sharing product, and never copy its code, text or
+- No copying: never inspect, decompile or sniff another window-sharing product, and never copy its code, text or
   assets. Never name the reference product in code, UI, docs or commit messages.
 - Only Apache-2.0, MIT or BSD-compatible code. Record every reuse in THIRD_PARTY.md, and put an attribution header on derived files.
 - Never push directly to main; work on a new branch and open a PR against main.
