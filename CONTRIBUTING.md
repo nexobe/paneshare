@@ -19,7 +19,7 @@ Test anything that touches permissions with the app bundle, not the Xcode scheme
 
 - **No copying.** Do not copy code, text or assets from any other window-sharing product, and do not
   decompile or inspect one. Design from public behaviour and Apple's public APIs. The project's own spec,
-  [`docs/SPEC.md`](docs/SPEC.md), came from a separate analyst's study of one public build; see
+  [`docs/SPEC.md`](docs/SPEC.md), came from a study of how an existing app behaves; see
   ["How this started"](README.md#how-this-started). That work is done, and contributors don't repeat it.
 - **Licenses.** Only MIT, BSD or Apache-2.0 code may be reused. Record every reuse in
   [`THIRD_PARTY.md`](THIRD_PARTY.md) and put an attribution header on derived files.

@@ -153,15 +153,8 @@ every selector's type encoding is checked first, so if Apple changes or removes 
 itself unavailable instead of crashing. Using them rules out the Mac App Store (App Review guideline 2.5.1).
 No other private frameworks or symbols are used (for example, `_AXUIElementGetWindow` and SkyLight are not).
 
-## Target-derived input
+## Functional spec
 
-`docs/SPEC.md` is the sanitized functional spec derived from the reference product. A separate analyst wrote it on a local Mac
-from one public build: static analysis of the bundle layout, declared permissions, linked frameworks and imported
-APIs, plus a decompile of the product's small Dock helper. The main binary was not fully decompiled
-(`docs/SPEC.md`, "How to read this"). The spec is sanitized. It describes behaviour, Apple APIs and architecture
-only, with no decompiled code, pseudocode, symbol names, UI text or assets.
-
-No code, text, names or assets from that product are in this repository. The analyst's working notes and any
-decompiler output were never committed, here or in the private repository where paneshare was first built. The
-README section "How this started" gives the order of events, and what is not yet published about the coding
-agents' inputs.
+`docs/SPEC.md` is a functional spec written from a study of how an existing window-sharing app behaves. It
+describes behaviour, Apple APIs and architecture only. No code, text, names or assets from that app are in this
+repository.

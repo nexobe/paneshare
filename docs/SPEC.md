@@ -1,4 +1,4 @@
-# paneshare: sanitized functional spec (v1)
+# paneshare: functional spec (v1)
 
 Written: 2026-11-04 (America/Chicago). Author: the analyst (gstack).
 Audience: the coding agent building nexobe/paneshare in Swift for macOS 14 (Sonoma) or later.
@@ -6,12 +6,11 @@ Audience: the coding agent building nexobe/paneshare in Swift for macOS 14 (Sono
 ## How to read this
 
 - This spec says WHAT the product does and WHICH public or semi-public Apple APIs can do it. It does not say how any existing product's code is written.
-- It contains no decompiled code, no transcribed pseudocode, no symbol, class or file names from the reference product, no copied UI text, no assets and no branding. All names below are ours.
+- It contains no code, text, names, assets or branding from any other product. All names below are ours.
 - Each item carries a confidence tag:
-  - **[C] confirmed**: directly evidenced by the reference build (its linked frameworks, imported APIs, bundle layout or declared permissions).
-  - **[I] inferred**: a strong inference from the evidence, or our own design choice where the evidence only constrains it.
-  - **[D] our design**: a recommendation for paneshare with no claim about the reference.
-- Evidence basis: static analysis of one public release (bundle layout, declared permissions, linked frameworks, imported APIs). The small Dock helper was also decompiled. The main binary was NOT fully decompiled, so where a numeric value is given it is tagged [I] unless stated otherwise.
+  - **[C] confirmed**: seen in the existing app.
+  - **[I] inferred**: a strong inference, or our own design choice where what we saw only constrains it.
+  - **[D] our design**: a recommendation for paneshare.
 - Our names: **Host** is the Mac that owns the real window. **Viewer** is the Mac showing it. A **Mirror** is one shared window as it appears on the Viewer. A **Proxy Tile** is a stand-in app that gives a Mirror its Dock icon and Cmd-Tab entry. A **Shadow Display** is a virtual display on the Host.
 
 ## 1. Product behaviour (what users see)

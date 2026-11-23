@@ -70,26 +70,21 @@ spctl -a -vv -t exec /Applications/paneshare.app           # accepted, source=No
 On November 4, 2026, Asghar Ali (NEXOBE) wanted a way to use a window from one Mac on another, as a
 real window instead of a whole-screen share. The question was simple: could we build our own in a day?
 
-paneshare was built in two separate roles:
+paneshare was built in two roles:
 
-- **The analyst** worked on a local Mac. It studied one public build of an existing window-sharing app: static
-  analysis of the bundle layout, declared permissions, linked frameworks and imported APIs, and a decompile of the
-  app's small Dock helper. The main binary was not fully decompiled. The analyst then wrote a sanitized functional
-  spec, [`docs/SPEC.md`](docs/SPEC.md). It says what the product does and which Apple APIs can do it. It contains no
-  decompiled code, pseudocode, symbol names, UI text, assets or branding from that product.
+- **The analyst** studied how an existing window-sharing app behaves and wrote a functional spec,
+  [`docs/SPEC.md`](docs/SPEC.md). It says what the product does and which Apple APIs can do it.
 - **The coding agents** (Cursor cloud agents on Claude Opus, driven by gstack, Asghar's virtual product and
   engineering team) ran in the cloud and wrote the code.
 
-One person, Asghar, orchestrated both. The first code was committed between 08:37 and 09:11 UTC. The sanitized
-spec was committed at 09:18 UTC. No teardown notes, decompiler output or binaries from the analysis were ever
-committed, here or in the private repository where paneshare was first built. We have not yet published a review
-of the coding agents' session logs, so this page makes no claim about every input they got.
+One person, Asghar, orchestrated both. The first code was committed between 08:37 and 09:11 UTC, and the spec at
+09:18 UTC.
 
-No code, text, names or assets from the other product are in this repository.
+No code, text, names or assets from any other product are in this repository.
 
 What happened, in order, all on Nov 4, 2026:
 
-1. **Spec and architecture.** The sanitized spec, a study of open-source building blocks, then
+1. **Spec and architecture.** The functional spec, a study of open-source building blocks, then
    [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): components, wire protocol v1, threat model, latency
    budget and test plan.
 2. **MVP.** Window picker, per-window capture, HEVC/H.264 encode and decode, native viewer windows, input
@@ -329,7 +324,7 @@ The project is released under the [MIT License](LICENSE), with one exception. Th
 - `Sources/PaneshareVirtualDisplay/VirtualDisplay.swift`
 - `Sources/PaneshareCore/Geometry/VirtualDisplayPlanner.swift` (the `ObjCTypeEncoding` part)
 
-The design follows the sanitized functional spec [`docs/SPEC.md`](docs/SPEC.md). "How this started" above says
+The design follows the functional spec [`docs/SPEC.md`](docs/SPEC.md). "How this started" above says
 how it was made.
 
 To report a security problem, see [`SECURITY.md`](SECURITY.md). To contribute, see

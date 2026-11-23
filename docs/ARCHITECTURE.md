@@ -1,8 +1,7 @@
 # paneshare architecture
 
 Status: MVP design, revision 3 (2026-11-04). Revision 1 was written before the code. Revision 2 recorded where the
-implementation settled. Revision 3 reconciles the design with the sanitized functional spec (`docs/SPEC.md`), the
-only target-derived input this project uses: §0 maps every spec item to what we built, §4.2 replaces the pairing
+implementation settled. Revision 3 reconciles the design with the functional spec (`docs/SPEC.md`): §0 maps every spec item to what we built, §4.2 replaces the pairing
 ceremony with a 6-digit code and a PAKE, §6 makes per-app Dock helpers the shipped presenter, §7 adds the quality
 factor and the frozen stream size during resize, §4.3 and §9 add the secure-input pause and the exclusion list, and
 §13 records what is deferred and how transport upgrades to LiveKit. The two seams most likely to change, **Dock/Command-Tab

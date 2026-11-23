@@ -2,7 +2,7 @@
 
 ## Non-negotiables
 - No copying: never inspect, decompile or sniff another window-sharing product, and never copy its code, text or
-  assets. Never name the reference product in code, UI, docs or commit messages.
+  assets. Never name the product the spec describes in code, UI, docs or commit messages.
 - Only Apache-2.0, MIT or BSD-compatible code. Record every reuse in THIRD_PARTY.md, and put an attribution header on derived files.
 - Never push directly to main; work on a new branch and open a PR against main.
 - In the app: no Process/NSTask/shell, TLS pinning always on, and no listener while sharing is off.
@@ -15,7 +15,7 @@
 - No private APIs, with one approved exception: `CGVirtualDisplay`, only in `PaneshareVirtualDisplay`, looked up at
   run time with type-encoding checks, behind the off-by-default "Virtual display" setting. Add no others.
   That's why Dock helpers are ad hoc signed in process (`AdHocSigner`), never with `codesign`.
-- docs/SPEC.md is the only target-derived input. Use our own names, never the spec's product terms, in code and UI.
+- docs/SPEC.md is the only input about another product. Use our own names, never the spec's product terms, in code and UI.
 
 ## Workflow
 - Test with `swift build && swift test`. Without a Mac, the core builds on Linux; check macOS files with

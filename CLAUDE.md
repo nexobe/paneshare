@@ -35,4 +35,4 @@ The syntax-only check in `.clinerules` is for machines without a Mac. On a Mac, 
 
 ## Docs rule
 
-Never name the reference product in code, UI, docs or commit messages.
+Never name the product the spec describes in code, UI, docs or commit messages.
