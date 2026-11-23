@@ -37,6 +37,7 @@ enum DoctorRunner {
         }
         if let viewer = model.viewer {
             facts.connectedHosts = viewer.sessions.filter { $0.state == .connected }.count
+            facts.localNetworkBlocked = viewer.localNetworkBlocked
         }
         return Doctor.text(facts)
     }

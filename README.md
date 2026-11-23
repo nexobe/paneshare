@@ -9,6 +9,43 @@ Command-Tab entry. Traffic is end-to-end encrypted and mutually authenticated be
 server, account or relay. Someone without paneshare can also view one window in a browser through a share link
 (same LAN or tailnet), with their own pointer.
 
+## Install
+
+You need two Macs with macOS 14 or later. Install paneshare on both.
+
+1. Download `paneshare-<version>.dmg` from the
+   [latest release](https://github.com/nexobe/paneshare-releases/releases/latest). To check the download
+   first, see "Verify this build" below.
+2. Open the DMG and drag **paneshare** to **Applications**. Then open paneshare from Applications.
+3. The setup screen asks for three permissions. You set each one in **System Settings > Privacy & Security**.
+   - **Local Network** (both Macs): click **Allow** when macOS asks. Without it, the Macs can't find each other,
+     and paneshare shows an orange banner. If you clicked **Don't Allow**, turn paneshare on under
+     **Local Network**. If paneshare isn't in that list, quit it and open it again.
+   - **Screen Recording** (the Mac that shares): if paneshare isn't in the list, click **+** and choose it from
+     Applications. If macOS asks you to quit and reopen paneshare, do it.
+   - **Accessibility** (the Mac that shares): this lets the other Mac click, type and resize the shared window.
+4. Pair the two Macs and open a window. The steps are under "Use" below.
+
+On first launch, paneshare asks whether it may check for updates. It never installs an update without asking.
+
+**To uninstall:** quit paneshare and move it to the Trash. To remove its data too, delete
+`~/Library/Application Support/paneshare` and the `dev.paneshare.identity` items in Keychain Access, then run
+`tccutil reset All dev.paneshare.app` to clear its permissions.
+
+## Notices
+
+- **Early software.** paneshare is at version 0.1. Some features have run only on one Mac so far (see Status).
+  Expect bugs, and report them in Issues.
+- **A paired Mac can control the shared app.** Pair only with Macs and people you trust with that app. See
+  "Security model" and "Known risks" below.
+- **No warranty.** paneshare is provided "as is", without warranty of any kind, as the [MIT License](LICENSE)
+  says.
+- **No account, server or telemetry.** paneshare sends nothing to NEXOBE. It talks only to the Macs you pair
+  with, to browsers you send a share link to, and to the update feed, if you allow update checks.
+- **Not affiliated with Apple.** Mac, macOS and other Apple names are trademarks of Apple Inc. paneshare is not
+  made, endorsed or supported by Apple.
+- **Third-party code** is listed with its licenses in [`THIRD_PARTY.md`](THIRD_PARTY.md).
+
 ## Verify this build
 
 Release DMGs are signed with Developer ID by NEXOBE INC, team ID **`TV289JZ58M`**, and notarized by Apple. Each
@@ -69,23 +106,21 @@ What happened, in order, all on Nov 4, 2026:
 
 ## Status
 
-**Working MVP, notarized.** As of Nov 4, 2026, the app builds with 0 errors on Xcode 27 (macOS 27 SDK).
-It's signed with Developer ID, notarized by Apple (Accepted), stapled and passes Gatekeeper. It's installed on
-Asghar's MacBook Pro.
+**Version 0.1.1, notarized.** As of Nov 22, 2026, the app builds with 0 errors on Xcode 27 (macOS 27 SDK).
+The release DMG is signed with Developer ID, notarized by Apple (Accepted), stapled and passes Gatekeeper.
 
 - **Proven on real Macs:** discovery, pairing (v1), and streaming and controlling windows between two Macs.
   Sharp text and pairing v2 were built and installed. They still need a test against a second Mac running this build.
 - **Built but not yet tested on two Macs:** app audio, the virtual display, share links, Dock helpers from a
   downloaded copy, and auto-update.
-- **Not live yet:** auto-update. The feed will live at `https://nexobe.github.io/paneshare-releases/appcast.xml`
-  (GitHub Pages of a public releases repo, RELEASING §3). No release is published there yet, so installed builds
-  don't check for updates.
+- **Auto-update:** the feed is at `https://nexobe.github.io/paneshare-releases/appcast.xml` (GitHub Pages of the
+  public releases repo, RELEASING §3). Installing an update from it hasn't been tested yet.
 - **License:** MIT (see [`LICENSE`](LICENSE)), with six adapted files under Apache-2.0
   ([`LICENSES/Apache-2.0.txt`](LICENSES/Apache-2.0.txt); the files are listed under "Third-party code and
   license" below). It isn't for the Mac App
   Store: it uses a private virtual-display API and controls other apps' input, so it ships as a notarized DMG.
-- **Unit tests:** the platform-neutral core (`PaneshareCore`) passes 175 tests on Swift 6.0.3 and 6.2.3 on Linux
-  and 176 on Xcode 27. GitHub Actions is disabled on the repo, so CI doesn't run. The manual plan is in [`docs/TESTING.md`](docs/TESTING.md).
+- **Unit tests:** the platform-neutral core (`PaneshareCore`) passes 230 tests on Xcode 27. The CI workflow
+  (`.github/workflows/ci.yml`) builds and tests on Linux and macOS, but GitHub Actions is still off on the repo. The manual plan is in [`docs/TESTING.md`](docs/TESTING.md).
 
 ### Component status
 
@@ -190,8 +225,9 @@ planned LiveKit transport.
   host user types it into the prompt. Each try runs a PAKE (X25519 with an Elligator 2 generator derived from the
   code and both TLS keys, HKDF and HMAC confirmations). A man in the middle gets one guess per try and nothing to
   test offline. The host prompt is hidden from screen capture.
-- **Input stays in the shared window:** it's accepted only for streams the viewer opened, clamped to the window, and keys
-  are sent only when that window's app is frontmost. Key presses pause while secure input is on at the host.
+- **Input goes to the shared window's app:** it's accepted only for streams the viewer opened and clamped to the
+  window's frame, and keys are sent only when that window's app is frontmost. Key presses pause while secure input
+  is on at the host. It isn't limited to the one window: see risk 12.
 - **The clipboard stays put unless you ask:** sync is off by default and needs both Macs. Text moves only while a
   remote window is in front on the viewer, and items marked private stay on their Mac.
 - **Files need the receiver's say-so:** receiving is off by default on each side, with separate settings for files
@@ -255,6 +291,11 @@ planned LiveKit transport.
     releases repo on GitHub Pages (RELEASING §3). Losing the Sparkle key *and* the Developer ID certificate would
     strand installed copies. Back both up (RELEASING §1). The audio-input entitlement for the process tap under
     the hardened runtime is a precaution, and still unverified.
+12. **Input isn't limited to the one shared window.** paneshare checks that the shared window's app is in front,
+    then posts keys as if they came from the host's keyboard. So a paired viewer's keys can also reach that app's
+    other windows and system shortcuts such as Command-Space and Command-Tab. A click lands on whatever is at that
+    point on the screen, even another window of the same app on top of the shared one. Pair only with people you
+    trust with the shared app. The fix is on the roadmap.
 
 ## Roadmap
 
@@ -267,7 +308,9 @@ planned LiveKit transport.
 7. Take-over mode (stream a whole virtual desktop), building on the virtual display.
 8. Share links: Opus audio and an optional keyboard scope for guests, a trusted certificate via `tailscale cert`,
    and internet links per `docs/SHARE-LINKS-INTERNET.md`.
-9. Run the first signed release (TESTING §4.10) and publish it to `nexobe/paneshare-releases` (RELEASING §3); then the data-protection
+9. Keep input inside the shared window: post keys to the app's process, send them only while the shared window
+   has focus, and check that it's the top window before a click (risk 12).
+10. Run the first signed release (TESTING §4.10) and publish it to `nexobe/paneshare-releases` (RELEASING §3); then the data-protection
    keychain (needs a provisioning profile) and Swift 6 language mode.
 
 ## Third-party code and license

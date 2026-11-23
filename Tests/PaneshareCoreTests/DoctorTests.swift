@@ -19,6 +19,7 @@ final class DoctorTests: XCTestCase {
         let breaks: [(inout DoctorFacts) -> Void] = [
             { $0.screenRecording = false }, { $0.accessibility = false }, { $0.quarantined = true },
             { $0.localNetworkAddress = false }, { $0.loginItemNeedsApproval = true },
+            { $0.localNetworkBlocked = true },
         ]
         for change in breaks {
             var f = healthy

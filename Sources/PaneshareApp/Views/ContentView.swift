@@ -26,6 +26,8 @@ struct ContentView: View {
             if model.showOnboarding {
                 OnboardingView(model: model)
             } else if let host = model.host, let viewer = model.viewer, let trust = model.trust {
+                VStack(spacing: 12) {
+                LocalNetworkBanner(viewer: viewer)
                 TabView(selection: $tab) {
                     ViewerPanel(viewer: viewer, trust: trust)
                         .tabItem { Label("Connect", systemImage: "macwindow.on.rectangle") }
@@ -36,6 +38,7 @@ struct ContentView: View {
                     AboutPanel(model: model)
                         .tabItem { Label("This Mac", systemImage: "info.circle") }
                         .tag(Tab.about)
+                }
                 }
                 .padding()
             }
@@ -88,6 +91,7 @@ struct AboutPanel: View {
             Section("Permissions") {
                 PermissionRow(title: "Screen Recording", granted: model.screenRecording, pane: .screenRecording)
                 PermissionRow(title: "Accessibility", granted: model.accessibility, pane: .accessibility)
+                if let viewer = model.viewer { LocalNetworkRow(viewer: viewer) }
                 Button("Show setup again") { model.showOnboarding = true }
             }
             Section {

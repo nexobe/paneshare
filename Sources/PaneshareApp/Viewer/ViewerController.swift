@@ -12,6 +12,8 @@ import PaneshareViewer
 final class ViewerController: ObservableObject {
     @Published private(set) var discovered: [DiscoveredHost] = []
     @Published private(set) var discoveryStatus = ""
+    /// macOS blocks Local Network access for paneshare: no Bonjour in either direction.
+    @Published private(set) var localNetworkBlocked = false
     @Published private(set) var sessions: [ViewerSession] = []
     @Published private(set) var pairingBusy = false
     @Published var pairingMessage: String?
@@ -37,11 +39,27 @@ final class ViewerController: ObservableObject {
         browser.onState = { [weak self] text in
             MainActor.assumeIsolated { self?.discoveryStatus = text }
         }
+        browser.onLocalNetworkBlocked = { [weak self] blocked in
+            MainActor.assumeIsolated {
+                guard let self, self.localNetworkBlocked != blocked else { return }
+                self.localNetworkBlocked = blocked
+            }
+        }
     }
+
+    private var activeObserver: NSObjectProtocol?
 
     func start() {
         browser.start()
         syncSessions()
+        // After the user turns Local Network on in System Settings, browse again when they come back.
+        activeObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self, self.localNetworkBlocked else { return }
+                self.browser.start()
+            }
+        }
     }
 
     /// Discovered hosts this viewer hasn't paired with, leaving out this Mac itself.

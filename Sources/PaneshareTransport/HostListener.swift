@@ -49,7 +49,13 @@ public final class HostListener: @unchecked Sendable {
         listener.stateUpdateHandler = { [weak self] state in
             switch state {
             case .ready: self?.onState?("Listening on port \(self?.port ?? 0)")
-            case .waiting(let e): self?.onState?("Waiting: \(e)")
+            case .waiting(let e):
+                if case .dns(let code) = e, code == -65570 {
+                    // kDNSServiceErr_PolicyDenied: Local Network access is off, so other Macs can't find this one.
+                    self?.onState?("Other Macs can't find this one: Local Network access is off for paneshare")
+                } else {
+                    self?.onState?("Waiting: \(e)")
+                }
             case .failed(let e): self?.onState?("Listener failed: \(e)")
             case .cancelled: self?.onState?("Stopped")
             default: break

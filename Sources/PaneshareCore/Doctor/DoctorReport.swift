@@ -21,6 +21,8 @@ public struct DoctorFacts: Equatable, Sendable {
     /// (the fields below) is unknown.
     public var fromCommandLine = false
     public var sharing: Bool?
+    /// macOS blocks Local Network access for the app, so Bonjour fails both ways.
+    public var localNetworkBlocked: Bool?
     public var listenerStatus: String?
     public var pairedHosts: Int?
     public var pairedViewers: Int?
@@ -65,6 +67,11 @@ public enum Doctor {
             out.append(DoctorCheck(.problem, "This Mac has no network address", fix: "Connect to a network or start Tailscale."))
         } else {
             out.append(DoctorCheck(.ok, "Network: local \(f.localNetworkAddress ? "yes" : "no"), Tailscale \(f.tailscaleAddress ? "yes" : "no")"))
+        }
+        if let blocked = f.localNetworkBlocked {
+            out.append(blocked
+                ? DoctorCheck(.problem, "Local Network access is off", fix: "Turn on paneshare in System Settings > Privacy & Security > Local Network. Other Macs can't find this one without it. Pair by address still works.")
+                : DoctorCheck(.ok, "Local Network access is on"))
         }
         if f.virtualDisplayProblem {
             out.append(DoctorCheck(.note, "Virtual displays aren't available on this Mac", fix: "Shared windows stay on this Mac's screens."))

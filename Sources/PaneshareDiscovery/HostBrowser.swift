@@ -22,8 +22,17 @@ public final class HostBrowser {
     private var browser: NWBrowser?
     public var onChange: (([DiscoveredHost]) -> Void)?
     public var onState: ((String) -> Void)?
+    /// True when macOS blocks Local Network access for this app, false once browsing works.
+    public var onLocalNetworkBlocked: ((Bool) -> Void)?
 
     public init() {}
+
+    /// macOS reports a denied Local Network permission as kDNSServiceErr_PolicyDenied (-65570).
+    /// It doesn't prompt again after the first answer, so the UI must say how to turn it on.
+    public static func isLocalNetworkDenied(_ error: NWError) -> Bool {
+        if case .dns(let code) = error { return code == -65570 }
+        return false
+    }
 
     public func start() {
         stop()
@@ -32,13 +41,26 @@ public final class HostBrowser {
         let browser = NWBrowser(for: .bonjourWithTXTRecord(type: Self.serviceType, domain: nil), using: params)
         browser.stateUpdateHandler = { [weak self] state in
             let text: String?
+            var blocked: Bool?
             switch state {
-            case .ready: text = "Looking for hosts…"
-            case .waiting(let e): text = "Local network unavailable (\(e)). Check Local Network access in System Settings."
-            case .failed(let e): text = "Discovery failed: \(e)"
+            case .ready:
+                text = "Looking for hosts…"
+                blocked = false
+            case .waiting(let e), .failed(let e):
+                if Self.isLocalNetworkDenied(e) {
+                    text = "Local Network access is off for paneshare, so it can't find other Macs."
+                    blocked = true
+                } else if case .waiting = state {
+                    text = "Local network unavailable (\(e))."
+                } else {
+                    text = "Discovery failed: \(e)"
+                }
             default: text = nil
             }
-            if let text { DispatchQueue.main.async { self?.onState?(text) } }
+            DispatchQueue.main.async {
+                if let text { self?.onState?(text) }
+                if let blocked { self?.onLocalNetworkBlocked?(blocked) }
+            }
         }
         browser.browseResultsChangedHandler = { [weak self] results, _ in
             let hosts = results.compactMap(Self.host(from:)).sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }

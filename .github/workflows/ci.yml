@@ -1,17 +1,27 @@
 name: CI
 
+# Builds and tests every push to main and every pull request. Releases are not made here: they are
+# signed and notarized on the release Mac with scripts/ship.sh, so no signing key is stored in GitHub
+# (docs/RELEASING.md).
+
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   linux:
     name: Linux (core tests)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     container: swift:6.0
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -27,6 +37,7 @@ jobs:
       matrix:
         os: [macos-14, macos-15]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -35,3 +46,10 @@ jobs:
       - run: swift build
       - run: swift test
       - run: scripts/make-app.sh debug
+      - name: Upload the unsigned app
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: matrix.os == 'macos-15'
+        with:
+          name: paneshare-unsigned-${{ github.sha }}
+          path: build/app.noindex/paneshare.app
+          retention-days: 7

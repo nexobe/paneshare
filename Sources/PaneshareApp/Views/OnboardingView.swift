@@ -8,7 +8,7 @@ struct OnboardingView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text("Set up paneshare").font(.largeTitle.bold())
-            Text("To view windows from another Mac, you don't need any permissions. To share this Mac's windows, grant two:")
+            Text("To share this Mac's windows, grant Screen Recording and Accessibility. Both Macs need Local Network so they can find each other.")
                 .foregroundStyle(.secondary)
 
             PermissionStep(
@@ -24,8 +24,9 @@ struct OnboardingView: View {
                 request: { Permissions.requestAccessibility(); Permissions.open(.accessibility) },
                 note: nil)
 
-            Text("paneshare also asks to find devices on your local network. Allow it so Macs can find each other; a Tailscale address works without it.")
-                .font(.callout).foregroundStyle(.secondary)
+            if let viewer = model.viewer {
+                LocalNetworkStep(viewer: viewer)
+            }
 
             HStack {
                 Spacer()
@@ -45,6 +46,7 @@ struct PermissionStep: View {
     let granted: Bool
     let request: () -> Void
     let note: String?
+    var grantedLabel = "Granted"
 
     var body: some View {
         HStack(alignment: .top, spacing: 14) {
@@ -60,7 +62,7 @@ struct PermissionStep: View {
             }
             Spacer()
             if granted {
-                Text("Granted").foregroundStyle(.green)
+                Text(grantedLabel).foregroundStyle(.green)
             } else {
                 Button("Open System Settings", action: request)
             }

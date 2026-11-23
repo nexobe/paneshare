@@ -96,6 +96,27 @@ See §3. The feed URL is baked into every build, so choose it before the first r
 
 ## 2. Making a release
 
+### The short way: one command
+
+From a clean, committed checkout, with paneshare quit:
+
+```bash
+scripts/ship.sh 0.2.0
+```
+
+It runs `scripts/release.sh` (build, sign, notarize, staple, Dock self-test, signed appcast) with the feed at
+`https://nexobe.github.io/paneshare-releases/appcast.xml` and the notes in `docs/release-notes/0.2.0.md` if that
+file exists. Then it runs `scripts/publish.sh 0.2.0`, which checks the DMG and the appcast again and asks you to
+type `publish 0.2.0`. After that it pushes the DMG, notes and appcast to `nexobe/paneshare-releases` (GitHub
+Pages serves the feed from there) and creates the GitHub Release `v0.2.0` with the DMG and its SHA-256. Every key
+stays on the release Mac. GitHub Actions only builds and tests (`.github/workflows/ci.yml`); it signs nothing.
+
+If `asc` is a shell alias rather than a file on `PATH`, set `PANESHARE_ASC` to its path first.
+
+The rest of this section is what those two scripts do, step by step.
+
+### Building by hand
+
 From a clean, committed checkout (the script refuses uncommitted changes):
 
 ```bash
