@@ -35,7 +35,7 @@ A smaller pacing window alone only lowers throughput. Code: `TLSMessageChannel.s
 
 ### Issue and pull request templates
 
-**What:** Add `.github/ISSUE_TEMPLATE/` (bug report with macOS version, both Macs' roles, network type) and a PR template that links CONTRIBUTING's clean-room rule.
+**What:** Add `.github/ISSUE_TEMPLATE/` (bug report with macOS version, both Macs' roles, network type) and a PR template that links CONTRIBUTING's rule on other products' code.
 
 **Why:** Bug reports for a two-Mac app are useless without both sides' details.
 
