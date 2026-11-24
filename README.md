@@ -11,7 +11,8 @@ server, account or relay. Someone without paneshare can also view one window in 
 
 ## Install
 
-You need two Macs with macOS 14 or later. Install paneshare on both.
+You need two Macs with Apple silicon (M1 or later) and macOS 14 or later. Install paneshare on both. Intel Macs
+aren't supported by the release DMG yet.
 
 1. Download `paneshare-<version>.dmg` from the
    [latest release](https://github.com/nexobe/paneshare/releases/latest). To check the download
@@ -34,6 +35,7 @@ On first launch, paneshare asks whether it may check for updates. It never insta
 
 ## Notices
 
+- **Apple silicon only.** The release DMG runs on M1 and later Macs, not on Intel Macs.
 - **Early software.** paneshare is at version 0.1. Some features have run only on one Mac so far (see Status).
   Expect bugs, and report them in Issues.
 - **A paired Mac can control the shared app.** Pair only with Macs and people you trust with that app. See
