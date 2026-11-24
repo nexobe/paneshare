@@ -14,7 +14,7 @@ server, account or relay. Someone without paneshare can also view one window in 
 You need two Macs with macOS 14 or later. Install paneshare on both.
 
 1. Download `paneshare-<version>.dmg` from the
-   [latest release](https://github.com/nexobe/paneshare-releases/releases/latest). To check the download
+   [latest release](https://github.com/nexobe/paneshare/releases/latest). To check the download
    first, see "Verify this build" below.
 2. Open the DMG and drag **paneshare** to **Applications**. Then open paneshare from Applications.
 3. The setup screen asks for three permissions. You set each one in **System Settings > Privacy & Security**.
@@ -49,7 +49,7 @@ On first launch, paneshare asks whether it may check for updates. It never insta
 ## Verify this build
 
 Release DMGs are signed with Developer ID by NEXOBE INC, team ID **`TV289JZ58M`**, and notarized by Apple. Each
-release on [`nexobe/paneshare-releases`](https://github.com/nexobe/paneshare-releases/releases) lists the DMG's
+release on the [Releases page](https://github.com/nexobe/paneshare/releases) lists the DMG's
 SHA-256. Check a download before you open it:
 
 ```bash
@@ -108,8 +108,9 @@ The release DMG is signed with Developer ID, notarized by Apple (Accepted), stap
   Sharp text and pairing v2 were built and installed. They still need a test against a second Mac running this build.
 - **Built but not yet tested on two Macs:** app audio, the virtual display, share links, Dock helpers from a
   downloaded copy, and auto-update.
-- **Auto-update:** the feed is at `https://nexobe.github.io/paneshare-releases/appcast.xml` (GitHub Pages of the
-  public releases repo, RELEASING §3). Installing an update from it hasn't been tested yet.
+- **Auto-update:** from the next release on, the feed is the `appcast.xml` attached to the latest GitHub Release
+  of this repo (RELEASING §3). Versions 0.1.0 and 0.1.1 pointed at a feed that no longer exists, so they
+  won't find updates: download the next version by hand once. Installing an update hasn't been tested yet.
 - **License:** MIT (see [`LICENSE`](LICENSE)), with six adapted files under Apache-2.0
   ([`LICENSES/Apache-2.0.txt`](LICENSES/Apache-2.0.txt); the files are listed under "Third-party code and
   license" below). It isn't for the Mac App
@@ -305,7 +306,7 @@ planned LiveKit transport.
    and internet links per `docs/SHARE-LINKS-INTERNET.md`.
 9. Keep input inside the shared window: post keys to the app's process, send them only while the shared window
    has focus, and check that it's the top window before a click (risk 12).
-10. Run the first signed release (TESTING §4.10) and publish it to `nexobe/paneshare-releases` (RELEASING §3); then the data-protection
+10. Run the first signed release (TESTING §4.10) and publish it on this repo's Releases (RELEASING §3); then the data-protection
    keychain (needs a provisioning profile) and Swift 6 language mode.
 
 ## Third-party code and license

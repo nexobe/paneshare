@@ -31,7 +31,7 @@ A smaller pacing window alone only lowers throughput. Code: `TLSMessageChannel.s
 
 **Effort:** M
 **Priority:** P3
-**Depends on:** Stable public DMG URLs (paneshare-releases)
+**Depends on:** Stable public DMG URLs (GitHub Releases)
 
 ### Issue and pull request templates
 

@@ -1,8 +1,8 @@
 # Releasing paneshare
 
 How a signed, notarized paneshare is built, and how installed copies update themselves with Sparkle 2.
-Everything here runs on the release Mac. Nothing in the repository holds a secret, and no script uploads
-or publishes anything.
+Everything here runs on the release Mac. Nothing in the repository holds a secret. Only `scripts/publish.sh`
+uploads anything, and it asks first.
 
 | Piece | Where it lives |
 | --- | --- |
@@ -105,10 +105,11 @@ scripts/ship.sh 0.2.0
 ```
 
 It runs `scripts/release.sh` (build, sign, notarize, staple, Dock self-test, signed appcast) with the feed at
-`https://nexobe.github.io/paneshare-releases/appcast.xml` and the notes in `docs/release-notes/0.2.0.md` if that
-file exists. Then it runs `scripts/publish.sh 0.2.0`, which checks the DMG and the appcast again and asks you to
-type `publish 0.2.0`. After that it pushes the DMG, notes and appcast to `nexobe/paneshare-releases` (GitHub
-Pages serves the feed from there) and creates the GitHub Release `v0.2.0` with the DMG and its SHA-256. Every key
+`https://github.com/nexobe/paneshare/releases/latest/download/appcast.xml`, downloads under
+`https://github.com/nexobe/paneshare/releases/download/v0.2.0/`, and the notes in `docs/release-notes/0.2.0.md`
+if that file exists. Then it runs `scripts/publish.sh 0.2.0`, which checks the DMG and the appcast again and asks
+you to type `publish 0.2.0`. After that it creates the GitHub Release `v0.2.0` on `nexobe/paneshare` at the
+pushed `HEAD`, with the DMG, notes, deltas and `appcast.xml` attached and the SHA-256 in the body. Every key
 stays on the release Mac. GitHub Actions only builds and tests (`.github/workflows/ci.yml`); it signs nothing.
 
 If `asc` is a shell alias rather than a file on `PATH`, set `PANESHARE_ASC` to its path first.
@@ -122,8 +123,9 @@ From a clean, committed checkout (the script refuses uncommitted changes):
 ```bash
 cd ~/src/paneshare
 git pull
-export PANESHARE_FEED_URL="https://<owner>.github.io/paneshare-releases/appcast.xml"
-PANESHARE_VERSION=0.2.0 scripts/release.sh
+export PANESHARE_FEED_URL="https://github.com/nexobe/paneshare/releases/latest/download/appcast.xml"
+export PANESHARE_DOWNLOAD_URL_PREFIX="https://github.com/nexobe/paneshare/releases/download/v0.2.0/"
+PANESHARE_FEED_MAX_VERSIONS=1 PANESHARE_VERSION=0.2.0 scripts/release.sh
 ```
 
 That signs as "Developer ID Application: NEXOBE INC (TV289JZ58M)" and notarizes with `asc`. To notarize
@@ -138,7 +140,8 @@ open "paneshare" downloaded from the Internet, click **Open**.
 
 Optional: `PANESHARE_RELEASE_NOTES=notes/0.2.0.md` (Markdown, shown in the update dialog and signed with the
 feed), `PANESHARE_BUILD_NUMBER` (default: commit count, which only grows on one branch),
-`PANESHARE_DOWNLOAD_URL_PREFIX` (default: the feed's folder), `PANESHARE_UPDATES_DIR` (default `build/updates`),
+`PANESHARE_DOWNLOAD_URL_PREFIX` (default: the feed's folder), `PANESHARE_FEED_MAX_VERSIONS` (versions kept in
+the appcast; `ship.sh` sets 1), `PANESHARE_UPDATES_DIR` (default `build/updates`),
 `PANESHARE_NOTARY_TIMEOUT` (default `30m`), and `PANESHARE_SKIP_DOCK_SELFTEST=1` (skips step 6).
 
 What `scripts/release.sh` does, in order:
@@ -169,36 +172,34 @@ What `scripts/release.sh` does, in order:
 
 If notarization fails, the script prints the notary tool's JSON (and, with `notarytool`, the submission's log) and stops.
 
-Then upload the new and changed files from `build/updates/` (the DMG, `appcast.xml`, any `.md` notes and
-`.delta` files) to the host, and keep `build/updates/` for the next release; `generate_appcast` uses the
-older DMGs in it for delta updates and to keep earlier entries. Optionally tag the commit:
-`git tag v0.2.0 && git push origin v0.2.0`.
+Then `scripts/publish.sh <version>` uploads the files the appcast points at, plus the appcast, as assets of the
+GitHub Release, and puts the DMG's SHA-256 in the release body. Keep `build/updates/` for the next release:
+`generate_appcast` uses the older DMGs in it to make delta updates. The SHA-256 goes in the release body, not the
+Sparkle release notes: `generate_appcast` signs those notes, and editing them after that breaks the signature.
+Users compare this value with the "Verify this build" box in the README.
 
-Then make a GitHub Release for the version on `nexobe/paneshare-releases`. Paste the DMG's SHA-256 into the
-release body. `release.sh` prints it in its summary (`SHA-256:` line); `shasum -a 256 build/updates/paneshare-<version>.dmg`
-prints it again. Put it in the release body, not the Sparkle release notes: `generate_appcast` signs those notes,
-and editing them after that breaks the signature. Users compare this value with the "Verify this build" box in
-the README.
-
-## 3. Hosting the feed (free options)
+## 3. Hosting the feed
 
 Users' copies fetch the feed and the DMGs without credentials, so any static HTTPS host works. **The chosen host
-is option A**: GitHub Pages of the public `nexobe/paneshare-releases` repo, with the feed at
-`https://nexobe.github.io/paneshare-releases/appcast.xml`. Keep the feed and DMGs there, apart from the source
-repository, so a source-repo change can't move the feed URL that every build has baked in.
+is GitHub Release assets on `nexobe/paneshare`.** Each release `vX.Y.Z` carries the DMG, its notes, its deltas
+and `appcast.xml`. The feed URL that every build has baked in is
+`https://github.com/nexobe/paneshare/releases/latest/download/appcast.xml`; GitHub redirects it to the newest
+release's asset over HTTPS, so it never changes. No GitHub Pages or Actions is involved.
 
-| Option | Feed URL | DMG URL | Limits (free) | Upload |
-| --- | --- | --- | --- | --- |
-| **A. Public "releases" repo + GitHub Pages** (recommended) | `https://<owner>.github.io/paneshare-releases/appcast.xml` | same folder (default prefix) | 100 MB per file, ~1 GB per site, soft 100 GB/month bandwidth | Copy `build/updates/*` into a clone of the releases repo, commit, push. Pages: Settings → Pages → deploy from branch `main`, folder `/`. |
-| **B. Public releases repo, DMGs as GitHub Release assets** | Pages as in A (or the repo's raw URL) | `https://github.com/<owner>/paneshare-releases/releases/download/v0.2.0/` | 2 GiB per asset | Set `PANESHARE_DOWNLOAD_URL_PREFIX` to that release's URL. The prefix applies to every entry `generate_appcast` writes, so keep only the newest DMG in `build/updates` (the feed then lists one version, and deltas are off). |
-| **C. Cloudflare Pages** | `https://<project>.pages.dev/appcast.xml` (or a custom domain) | same folder | 25 MiB per file, 20,000 files; no bandwidth cap | `npx wrangler pages deploy build/updates --project-name <project>`. Check the DMG stays under 25 MiB. |
+Every file `generate_appcast` writes shares one download prefix, and each release has its own folder
+(`releases/download/vX.Y.Z/`). So each appcast lists only its own version (`--maximum-versions 1`), plus delta
+updates to it from the older DMGs kept in `build/updates`. Older copies still update: Sparkle offers them the one
+version in the feed, using a delta when there is one. Limits: 2 GiB per asset, no bandwidth cap.
 
-The source repository `nexobe/paneshare` is public too, but it holds no release files. Whatever the host, it must be
-HTTPS: the app refuses a non-HTTPS feed, and Sparkle verifies the EdDSA signatures of the feed and of each DMG
-before using them, so a compromised host can't push code or redirect users elsewhere.
+Whatever the host, it must be HTTPS: the app refuses a non-HTTPS feed, and Sparkle verifies the EdDSA signatures
+of the feed and of each DMG before using them, so a compromised host can't push code or redirect users elsewhere.
 
-To move hosts later, ship one release (from the old host) whose `PANESHARE_FEED_URL` is the new URL, and
-keep the old feed up until users have updated.
+To move hosts later, ship one release from the current host whose `PANESHARE_FEED_URL` is the new URL, and keep
+the old feed up until users have updated.
+
+**History:** 0.1.0 and 0.1.1 were built with the feed at `https://nexobe.github.io/paneshare-releases/appcast.xml`.
+That repo was deleted when releases moved here, so those two versions can't find updates. Their users need to
+download the next version by hand once.
 
 ## 4. What the app does about updates
 

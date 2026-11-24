@@ -1,16 +1,16 @@
 #!/bin/bash
-# Publishes a release that scripts/release.sh built: pushes the DMG, release notes and signed appcast to
-# the GitHub Pages repo that serves the update feed, and creates a GitHub Release there with the DMG and
-# its SHA-256 (docs/RELEASING.md §2 and §3, option A).
+# Publishes a release that scripts/release.sh built: creates the GitHub Release vX.Y.Z on the source repo with
+# the DMG, its release notes, its delta updates and the signed appcast as assets (docs/RELEASING.md §2 and §3).
+# Installed copies read the feed at https://github.com/<repo>/releases/latest/download/appcast.xml, so the
+# newest release is always the live feed.
 #
 # Nothing is signed here and no key is read. It only uploads files release.sh already signed, after
 # checking them again. It asks before it publishes anything.
 #
 # Usage: scripts/publish.sh <version>          e.g. scripts/publish.sh 0.2.0
 # Optional environment:
-#   PANESHARE_RELEASES_REPO   GitHub repo that serves the feed (default nexobe/paneshare-releases)
+#   PANESHARE_REPO            GitHub repo to publish to (default nexobe/paneshare)
 #   PANESHARE_UPDATES_DIR     release.sh's output folder (default build/updates)
-#   PANESHARE_RELEASES_CLONE  local clone of the releases repo (default build/paneshare-releases)
 #   PANESHARE_TEAM_ID         team every signature must carry (default TV289JZ58M)
 #   PANESHARE_YES=1           don't ask for confirmation
 set -euo pipefail
@@ -24,11 +24,11 @@ step() { printf '\n==> %s\n' "$*"; }
 VERSION="${1:-${PANESHARE_VERSION:-}}"
 [ -n "$VERSION" ] || fail "usage: scripts/publish.sh <version>"
 [[ "$VERSION" =~ ^[0-9]+(\.[0-9]+){1,2}$ ]] || fail "version must look like 1.2 or 1.2.3"
-REPO="${PANESHARE_RELEASES_REPO:-nexobe/paneshare-releases}"
+REPO="${PANESHARE_REPO:-nexobe/paneshare}"
 UPDATES="${PANESHARE_UPDATES_DIR:-$ROOT/build/updates}"
-CLONE="${PANESHARE_RELEASES_CLONE:-$ROOT/build/paneshare-releases}"
 TEAM="${PANESHARE_TEAM_ID:-TV289JZ58M}"
 TAG="v$VERSION"
+PREFIX="https://github.com/$REPO/releases/download/$TAG/"
 DMG_NAME="paneshare-$VERSION.dmg"
 DMG="$UPDATES/$DMG_NAME"
 FEED="$UPDATES/appcast.xml"
@@ -47,45 +47,41 @@ spctl -a -t open --context context:primary-signature "$DMG" 2>/dev/null || fail 
 SIGNING="$(codesign -dv --verbose=2 "$DMG" 2>&1)" || fail "can't read the signature of $DMG_NAME"
 grep -qx "TeamIdentifier=$TEAM" <<<"$SIGNING" || fail "$DMG_NAME isn't signed by team $TEAM"
 grep -q "sparkle:edSignature" "$FEED" || fail "appcast has no EdDSA signatures"
-grep -qF "/$DMG_NAME\"" "$FEED" || fail "appcast doesn't list $DMG_NAME"
+grep -qF "$PREFIX$DMG_NAME\"" "$FEED" \
+  || fail "appcast doesn't point at $PREFIX$DMG_NAME; build with scripts/ship.sh, which sets the download prefix"
+
+# Upload exactly the files the appcast points at (DMG, notes, deltas), plus the appcast itself.
+ASSETS=()
+while IFS= read -r url; do
+  case "$url" in
+    "$PREFIX"*) name="${url#"$PREFIX"}" ;;
+    *) fail "appcast points outside this release: $url" ;;
+  esac
+  [ -f "$UPDATES/$name" ] || fail "appcast lists $name, but $UPDATES/$name is missing"
+  ASSETS+=("$UPDATES/$name")
+done < <(grep -oE 'https://[^"<> ]+' "$FEED" | sort -u)
+ASSETS+=("$FEED")
 SHA="$(shasum -a 256 "$DMG" | cut -d ' ' -f 1)"
-SIZE="$(du -h "$DMG" | cut -f 1)"
-echo "$DMG_NAME  $SIZE  sha256 $SHA"
+echo "$DMG_NAME  $(du -h "$DMG" | cut -f 1)  sha256 $SHA"
+printf '  %s\n' "${ASSETS[@]##*/}"
 
 step "Checking $REPO"
 gh repo view "$REPO" --json visibility -q .visibility 2>/dev/null | grep -qx PUBLIC \
-  || fail "$REPO doesn't exist or isn't public. Create it once:
-  gh repo create $REPO --public --description 'paneshare releases and update feed'
-then turn on Pages: Settings > Pages > deploy from branch main, folder / (docs/RELEASING.md §3)."
+  || fail "$REPO doesn't exist or isn't public"
 ! gh release view "$TAG" -R "$REPO" >/dev/null 2>&1 || fail "release $TAG already exists in $REPO"
+COMMIT="$(git rev-parse HEAD)"
+git fetch --quiet origin
+git merge-base --is-ancestor "$COMMIT" "origin/$(gh repo view "$REPO" --json defaultBranchRef -q .defaultBranchRef.name)" \
+  || fail "HEAD ($COMMIT) isn't pushed; push it first so the tag points at published code"
 
 echo
 echo "This will publish paneshare $VERSION:"
-echo "  - push $DMG_NAME, appcast.xml and its notes to $REPO (the live update feed)"
-echo "  - create the GitHub Release $TAG in $REPO with the DMG attached"
-echo "Installed copies that checked for updates will be offered $VERSION."
+echo "  - create the GitHub Release $TAG in $REPO at commit ${COMMIT:0:7}, marked latest"
+echo "  - attach the DMG, notes, deltas and appcast.xml (the live update feed)"
+echo "Installed copies that check for updates will be offered $VERSION."
 if [ "${PANESHARE_YES:-0}" != "1" ]; then
   read -r -p "Type 'publish $VERSION' to go on: " answer
   [ "$answer" = "publish $VERSION" ] || fail "stopped; nothing was published"
-fi
-
-step "Updating the feed repo"
-if [ -d "$CLONE/.git" ]; then
-  git -C "$CLONE" pull --ff-only --quiet
-else
-  rm -rf "$CLONE"
-  gh repo clone "$REPO" "$CLONE" -- --quiet
-fi
-# Every DMG, notes file and the appcast, so the feed's older entries and deltas keep resolving.
-rsync -a --include='*.dmg' --include='*.delta' --include='*.md' --include='*.html' --include='appcast.xml' \
-  --exclude='*' "$UPDATES/" "$CLONE/"
-touch "$CLONE/.nojekyll"
-git -C "$CLONE" add -A
-if git -C "$CLONE" diff --cached --quiet; then
-  echo "feed repo already up to date"
-else
-  git -C "$CLONE" commit --quiet -m "paneshare $VERSION"
-  git -C "$CLONE" push --quiet
 fi
 
 step "Creating the GitHub Release $TAG"
@@ -109,9 +105,10 @@ trap 'rm -f "$BODY"' EXIT
   echo
   echo "Signed with Developer ID by NEXOBE INC (team \`$TEAM\`) and notarized by Apple."
 } >"$BODY"
-gh release create "$TAG" "$DMG" -R "$REPO" --title "paneshare $VERSION" --notes-file "$BODY"
+gh release create "$TAG" "${ASSETS[@]}" -R "$REPO" --target "$COMMIT" --latest \
+  --title "paneshare $VERSION" --notes-file "$BODY"
 
 step "Done"
 echo "Release: https://github.com/$REPO/releases/tag/$TAG"
-echo "Feed:    https://${REPO%%/*}.github.io/${REPO#*/}/appcast.xml (Pages can take a minute to update)"
+echo "Feed:    https://github.com/$REPO/releases/latest/download/appcast.xml"
 echo "SHA-256: $SHA"

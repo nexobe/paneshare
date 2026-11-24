@@ -879,5 +879,5 @@ Full procedure and the reasoning: docs/RELEASING.md.
   first launch before any automatic check (`UpdateConsent`). Installs always ask
   (`SUAllowsAutomaticUpdates` off), and no system profile is sent. The app menu has **Check for Updates…** and
   **Check for Updates Automatically**.
-- **Feed host.** Any public static HTTPS host works. The chosen one is GitHub Pages of the public
-  `nexobe/paneshare-releases` repo; RELEASING §3 compares it with Release assets and Cloudflare Pages.
+- **Feed host.** Any public static HTTPS host works. The chosen one is GitHub Release assets on this repo, with
+  the feed at `releases/latest/download/appcast.xml`; RELEASING §3 compares it with other hosts.

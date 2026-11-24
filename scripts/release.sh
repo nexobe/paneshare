@@ -9,7 +9,7 @@
 #
 # Required environment:
 #   PANESHARE_FEED_URL        https URL of the appcast as users will fetch it, e.g.
-#                            https://example.github.io/paneshare-releases/appcast.xml
+#                            https://github.com/nexobe/paneshare/releases/latest/download/appcast.xml
 #   PANESHARE_VERSION         marketing version, e.g. 0.2.0
 # Signing and notarization (defaults are NEXOBE INC's release Mac):
 #   PANESHARE_SIGN_IDENTITY   default "Developer ID Application: NEXOBE INC (TV289JZ58M)"
@@ -22,6 +22,8 @@
 # Optional:
 #   PANESHARE_BUILD_NUMBER        CFBundleVersion (default: commit count of HEAD); must grow every release
 #   PANESHARE_DOWNLOAD_URL_PREFIX where the DMGs will be downloadable (default: the feed URL's folder)
+#   PANESHARE_FEED_MAX_VERSIONS   keep only this many versions in the appcast (generate_appcast
+#                                --maximum-versions); scripts/ship.sh sets 1
 #   PANESHARE_UPDATES_DIR         local folder that keeps every released DMG and the appcast
 #                                (default: build/updates); keep it between releases
 #   PANESHARE_RELEASE_NOTES       Markdown file with this version's release notes
@@ -215,14 +217,16 @@ if [ -n "${PANESHARE_RELEASE_NOTES:-}" ]; then
 fi
 # Signs each archive and, because the app sets SURequireSignedFeed, the feed and release notes too,
 # with the EdDSA key from the Keychain (macOS may ask to allow Keychain access).
-"$SPARKLE_BIN/generate_appcast" --download-url-prefix "$DOWNLOAD_PREFIX" -o "$UPDATES/$FEED_NAME" "$UPDATES"
+APPCAST_ARGS=(--download-url-prefix "$DOWNLOAD_PREFIX")
+[ -n "${PANESHARE_FEED_MAX_VERSIONS:-}" ] && APPCAST_ARGS+=(--maximum-versions "$PANESHARE_FEED_MAX_VERSIONS")
+"$SPARKLE_BIN/generate_appcast" "${APPCAST_ARGS[@]}" -o "$UPDATES/$FEED_NAME" "$UPDATES"
 grep -q "sparkle:edSignature" "$UPDATES/$FEED_NAME" || fail "appcast has no EdDSA signatures"
 grep -qF "$DOWNLOAD_PREFIX$DMG_NAME" "$UPDATES/$FEED_NAME" || fail "appcast doesn't list $DMG_NAME"
 
 step "Done"
 echo "App:      $APP (stapled)"
 echo "DMG:      $UPDATES/$DMG_NAME (signed, notarized, stapled)"
-echo "SHA-256:  $(shasum -a 256 "$UPDATES/$DMG_NAME" | cut -d ' ' -f 1)  (paste into the paneshare-releases GitHub Release body)"
+echo "SHA-256:  $(shasum -a 256 "$UPDATES/$DMG_NAME" | cut -d ' ' -f 1)  (publish.sh puts it in the GitHub Release body)"
 echo "Appcast:  $UPDATES/$FEED_NAME"
 echo
 echo "Nothing was uploaded. Upload the new and changed files in $UPDATES so that"
