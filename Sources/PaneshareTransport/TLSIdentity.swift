@@ -17,6 +17,16 @@ public enum TLSIdentityError: Error, CustomStringConvertible {
     }
 }
 
+/// Pairs a certificate with its private key without the keychain. `SecIdentityCreate` has shipped in
+/// Security.framework since macOS 10.12, but only the macOS 27 SDK declares it, so builds with older Xcode
+/// versions can't call it by name. Looking it up at run time builds with any Xcode and calls the same function.
+private func makeSecIdentity(_ certificate: SecCertificate, _ key: SecKey) -> SecIdentity? {
+    typealias Create = @convention(c) (CFAllocator?, SecCertificate, SecKey) -> Unmanaged<SecIdentity>?
+    guard let symbol = dlsym(UnsafeMutableRawPointer(bitPattern: -2), "SecIdentityCreate") else { return nil }
+    // CF_RETURNS_RETAINED: the caller owns the result.
+    return unsafeBitCast(symbol, to: Create.self)(nil, certificate, key)?.takeRetainedValue()
+}
+
 /// A `DeviceIdentity` (swift-crypto key + swift-certificates certificate) as Network.framework needs it.
 public struct TLSIdentity: @unchecked Sendable {
     public let device: DeviceIdentity
@@ -38,7 +48,7 @@ public struct TLSIdentity: @unchecked Sendable {
             throw TLSIdentityError.certificate
         }
         guard PinnedTLS.fingerprint(of: cert) == device.fingerprint else { throw TLSIdentityError.fingerprintMismatch }
-        guard let identity = SecIdentityCreate(nil, cert, key), let tls = sec_identity_create(identity) else {
+        guard let identity = makeSecIdentity(cert, key), let tls = sec_identity_create(identity) else {
             throw TLSIdentityError.identity
         }
         self.device = device
@@ -58,7 +68,7 @@ public struct TLSIdentity: @unchecked Sendable {
         guard let cert = SecCertificateCreateWithData(nil, Data(web.certificateDER) as CFData) else {
             throw TLSIdentityError.certificate
         }
-        guard let identity = SecIdentityCreate(nil, cert, key), let tls = sec_identity_create(identity) else {
+        guard let identity = makeSecIdentity(cert, key), let tls = sec_identity_create(identity) else {
             throw TLSIdentityError.identity
         }
         return tls
