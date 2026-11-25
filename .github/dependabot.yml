@@ -4,7 +4,17 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
+    commit-message:
+      prefix: ci
   - package-ecosystem: swift
     directory: /
     schedule:
       interval: weekly
+    groups:
+      swift:
+        patterns: ['*']
+    commit-message:
+      prefix: deps

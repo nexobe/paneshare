@@ -1,6 +1,16 @@
 # paneshare
 
-Share individual macOS windows between Macs as native windows. Open source (MIT), no account, no server, by NEXOBE.
+[![CI](https://github.com/nexobe/paneshare/actions/workflows/ci.yml/badge.svg)](https://github.com/nexobe/paneshare/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/nexobe/paneshare/actions/workflows/codeql.yml/badge.svg)](https://github.com/nexobe/paneshare/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/nexobe/paneshare/badge)](https://scorecard.dev/viewer/?uri=github.com/nexobe/paneshare)
+[![Latest release](https://img.shields.io/github/v/release/nexobe/paneshare)](https://github.com/nexobe/paneshare/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+![Apple silicon, macOS 14+](https://img.shields.io/badge/macOS-14%2B%20%C2%B7%20Apple%20silicon-lightgrey)
+
+Share individual macOS windows between Macs as native windows. Open source (MIT), no account, no server.
+
+Created by [Asghar Ali](https://github.com/asghar07) at NEXOBE. **Contributions are welcome:** see
+[Contributing](#contributing) below.
 
 Pick a window on one Mac (the **host**). It opens on another Mac (the **viewer**) as a real `NSWindow` with
 the source window's title, sharp at the viewer's backing scale. You can click, type, scroll and resize it.
@@ -337,5 +347,20 @@ The project is released under the [MIT License](LICENSE), with one exception. Th
 The design follows the functional spec [`docs/SPEC.md`](docs/SPEC.md). "How this started" above says
 how it was made.
 
-To report a security problem, see [`SECURITY.md`](SECURITY.md). To contribute, see
-[`CONTRIBUTING.md`](CONTRIBUTING.md).
+## Contributing
+
+Contributions are welcome, from bug reports to code. Good places to start:
+
+- Issues labelled [good first issue](https://github.com/nexobe/paneshare/labels/good%20first%20issue) or
+  [help wanted](https://github.com/nexobe/paneshare/labels/help%20wanted).
+- Running the manual test plan, [`docs/TESTING.md`](docs/TESTING.md), on your own two Macs and reporting
+  what works. Many features in Status above still need this.
+- Questions and ideas go in [Discussions](https://github.com/nexobe/paneshare/discussions).
+
+Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before you open a pull request. Every pull request runs the build,
+the tests, CodeQL and a dependency review, and a maintainer reviews it. For help, see
+[`SUPPORT.md`](SUPPORT.md). To report a security problem, see [`SECURITY.md`](SECURITY.md).
+
+## Author
+
+paneshare was created by [Asghar Ali](https://github.com/asghar07) (NEXOBE INC), who maintains it.
