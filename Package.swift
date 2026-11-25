@@ -14,9 +14,9 @@ let package = Package(
     // Upper bounds are the last releases whose manifests need at most Swift 5.10, so the package
     // resolves on Xcode 15.3 and later. Raise them when older toolchains are dropped.
     dependencies: [
-        .package(url: "https://github.com/apple/swift-crypto.git", "3.0.0"..<"4.0.0"),
-        .package(url: "https://github.com/apple/swift-certificates.git", "1.0.0"..<"1.16.0"),
-        .package(url: "https://github.com/apple/swift-asn1.git", "1.0.0"..<"1.5.0"),
+        .package(url: "https://github.com/apple/swift-crypto.git", "3.0.0"..<"5.0.0"),
+        .package(url: "https://github.com/apple/swift-certificates.git", "1.0.0"..<"2.0.0"),
+        .package(url: "https://github.com/apple/swift-asn1.git", "1.0.0"..<"2.0.0"),
         // Auto-update (MIT). A prebuilt XCFramework; only the macOS app links it.
         .package(url: "https://github.com/sparkle-project/Sparkle", "2.10.1"..<"3.0.0"),
     ],
