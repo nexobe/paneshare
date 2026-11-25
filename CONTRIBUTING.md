@@ -1,6 +1,19 @@
 # Contributing to paneshare
 
-Thanks for helping. Read this before you open a pull request.
+Thanks for helping! Contributions of every size are welcome: a bug report with both Macs' details, a test
+run of [`docs/TESTING.md`](docs/TESTING.md) on your own two Macs, a docs fix, or code.
+
+**Where to start:** issues labelled
+[good first issue](https://github.com/nexobe/paneshare/labels/good%20first%20issue) or
+[help wanted](https://github.com/nexobe/paneshare/labels/help%20wanted). For a bigger change, open an issue or
+a [discussion](https://github.com/nexobe/paneshare/discussions) first, so we can agree on the approach before
+you spend time on it.
+
+**How a pull request goes:** fork the repo, make a branch, and open a pull request against `main`. A maintainer
+approves the checks for first-time contributors. The build, the unit tests, CodeQL and a dependency review
+must pass, and a maintainer reviews the change. `main` takes changes only through pull requests.
+
+Read the rest of this page before you open a pull request.
 
 ## Build and test
 
