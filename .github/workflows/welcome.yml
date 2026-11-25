@@ -1,0 +1,30 @@
+name: Welcome
+
+# Thanks people for their first issue or pull request and points them to the guides. It only posts a
+# comment: it never checks out or runs code from a pull request, so pull_request_target is safe here.
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+permissions: {}
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/first-interaction@1c4688942c71f71d4f5502a26ea67c331730fa4d # v3.1.0
+        with:
+          issue_message: |
+            Thanks for opening your first issue in paneshare! A maintainer will read it soon.
+            If it's a bug, the Problem report from both Macs (This Mac tab > Copy Problem Report) helps a lot.
+            Please don't post security problems here: use Security > Report a vulnerability instead.
+          pr_message: |
+            Thanks for your first pull request to paneshare! Please check CONTRIBUTING.md, especially the
+            "No copying" and license rules. A maintainer will approve the checks and review it soon.
