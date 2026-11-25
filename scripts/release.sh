@@ -171,12 +171,10 @@ xcrun stapler validate "$APP"
 spctl -a -vv -t exec "$APP"
 
 step "Building, signing, notarizing and stapling the disk image"
-STAGE="$APPS/dmg"
-mkdir -p "$STAGE"
-ditto "$APP" "$STAGE/paneshare.app"
-ln -s /Applications "$STAGE/Applications"
 DMG="$WORK/$DMG_NAME"
-hdiutil create -volname "paneshare $PANESHARE_VERSION" -srcfolder "$STAGE" -fs HFS+ -format UDZO -ov "$DMG"
+# Styled window (background, arrow, icon positions) and the app icon as the volume icon.
+# Finder lays the window out, so the first run asks to let this terminal control Finder.
+"$ROOT/scripts/dmg/make-dmg.sh" "$APP" "$DMG" "paneshare $PANESHARE_VERSION"
 codesign --force --sign "$PANESHARE_SIGN_IDENTITY" --timestamp "$DMG"
 notarize "$DMG"
 xcrun stapler staple "$DMG"

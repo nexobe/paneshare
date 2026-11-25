@@ -1,0 +1,12 @@
+# Every change needs a review from a maintainer. Security-sensitive paths are listed on their own so they
+# stay owned even if the default line changes.
+*                                   @asghar07 @im-nasirr
+/Sources/PaneshareTransport/        @asghar07
+/Sources/PaneshareCore/Pairing/     @asghar07
+/Sources/PaneshareCore/Web/         @asghar07
+/Sources/PaneshareCore/Identity/    @asghar07
+/Sources/PaneshareCore/Update/      @asghar07
+/Sources/PaneshareApp/Update/       @asghar07
+/Sources/PaneshareApp/paneshare.entitlements @asghar07
+/scripts/                           @asghar07
+/.github/                           @asghar07
