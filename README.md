@@ -9,6 +9,13 @@ Command-Tab entry. Traffic is end-to-end encrypted and mutually authenticated be
 server, account or relay. Someone without paneshare can also view one window in a browser through a share link
 (same LAN or tailnet), with their own pointer.
 
+![The other Mac's screen, with Calculator in front, open as a window on this Mac](docs/images/remote-window.jpg)
+
+*Another Mac's screen open as a window on this Mac, with Calculator in front. The Connect tab below shows the
+paired Mac and the round-trip time. Personal details were removed from both screenshots.*
+
+<img src="docs/images/connect.png" width="560" alt="The Connect tab: a paired Mac, connected, 8 ms">
+
 ## Install
 
 You need two Macs with Apple silicon (M1 or later) and macOS 14 or later. Install paneshare on both. Intel Macs
