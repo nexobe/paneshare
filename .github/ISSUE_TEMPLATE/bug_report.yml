@@ -1,0 +1,66 @@
+name: Bug report
+description: Something in paneshare doesn't work as it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. paneshare runs on two Macs, so please describe both.
+        Security problems go to private reporting instead: Security > Report a vulnerability.
+        Remove anything private from logs and screenshots (Mac names, window contents, addresses).
+  - type: input
+    id: version
+    attributes:
+      label: paneshare version
+      description: paneshare > About paneshare, on both Macs.
+      placeholder: "0.1.1 on both"
+    validations:
+      required: true
+  - type: input
+    id: host
+    attributes:
+      label: Host Mac (the one sharing)
+      description: Model and macOS version.
+      placeholder: "MacBook Pro M1 Pro, macOS 15.4"
+    validations:
+      required: true
+  - type: input
+    id: viewer
+    attributes:
+      label: Viewer Mac (the one showing the window)
+      placeholder: "MacBook Air M3, macOS 26.1"
+    validations:
+      required: true
+  - type: dropdown
+    id: network
+    attributes:
+      label: Network
+      options:
+        - Same Wi-Fi or LAN
+        - Tailscale
+        - Pair by address over another VPN
+        - Share link in a browser
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. On the host, ...
+        2. On the viewer, ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and what happened
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: Problem report
+      description: This Mac tab > Copy Problem Report, from both Macs if you can. Check it for private details first.
+      render: text

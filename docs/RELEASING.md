@@ -160,7 +160,10 @@ What `scripts/release.sh` does, in order:
    `codesign --verify --deep --strict`.
 4. Zips the app, notarizes it (`asc notarization submit … --wait`, or `xcrun notarytool submit … --wait`), staples it, and
    checks it with `xcrun stapler validate` and `spctl -a -vv -t exec` (expect `source=Notarized Developer ID`).
-5. Builds `paneshare-<version>.dmg` (the app plus an `/Applications` link), signs it, notarizes it, staples it,
+5. Builds `paneshare-<version>.dmg` with `scripts/dmg/make-dmg.sh`: the app and an `/Applications` link on a
+   dark background with a "drag to Applications" arrow (`Resources/DMG/`, drawn by `scripts/dmg/background.py`),
+   and the app icon as the volume icon. Finder writes the window layout, so the first run asks to let the
+   terminal control Finder (Privacy & Security > Automation). Then it signs the DMG, notarizes it, staples it,
    and checks it with `stapler validate` and `spctl -a -vv -t open --context context:primary-signature`.
 6. **Dock helper self-test** (§5): copies the DMG, marks the copy quarantined as a browser would, installs the
    app from it into a temporary folder (also marked quarantined), checks it with `spctl`, and launches it with

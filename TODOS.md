@@ -33,16 +33,6 @@ A smaller pacing window alone only lowers throughput. Code: `TLSMessageChannel.s
 **Priority:** P3
 **Depends on:** Stable public DMG URLs (GitHub Releases)
 
-### Issue and pull request templates
-
-**What:** Add `.github/ISSUE_TEMPLATE/` (bug report with macOS version, both Macs' roles, network type) and a PR template that links CONTRIBUTING's rule on other products' code.
-
-**Why:** Bug reports for a two-Mac app are useless without both sides' details.
-
-**Context:** Deferred from the launch CEO review (E6).
-
-**Effort:** S
-**Priority:** P3
-**Depends on:** The repo going public
-
 ## Completed
+
+- Issue forms, a PR template and CODEOWNERS (`.github/`), with CodeQL, Scorecard and dependency review.
