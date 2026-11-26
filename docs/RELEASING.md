@@ -201,7 +201,7 @@ To move hosts later, ship one release from the current host whose `PANESHARE_FEE
 the old feed up until users have updated.
 
 **History:** 0.1.0 and 0.1.1 were built with the feed at `https://nexobe.github.io/paneshare-releases/appcast.xml`.
-That repo was deleted when releases moved here, so those two versions can't find updates. Their users need to
+That repo was made private when releases moved here, so its feed is offline and those two versions can't find updates. Their users need to
 download the next version by hand once.
 
 ## 4. What the app does about updates
